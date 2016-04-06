@@ -6,22 +6,42 @@ Pod::Spec.new do |s|
   s.license             = "MIT"
   s.author              = { "Martin Conte Mac Donell" => "Reflejo@gmail.com" }
   s.platform            = :ios, "8.0"
-  s.source              = { :git => "git@github.com:lyft/LyftKit.git" }
+  s.source              = { :git => "git@github.com:lyft/gaia.git" }
   s.default_subspec     = "Core"
 
   s.subspec 'Core' do |ss|
     ss.dependency     "Gaia/GoogleMaps"
-    ss.dependency     "Gaia/Abstraction"
+    ss.dependency     "Gaia/Mapbox"
+  end
+
+  # Workaround while this is fixed: https://code.google.com/p/gmaps-api-issues/issues/detail?id=9512
+  s.subspec 'GoogleMapsFramework' do |ss|
+    ss.frameworks          = [
+        "Accelerate", "AVFoundation", "CoreBluetooth", "CoreData",
+        "CoreLocation", "CoreText", "GLKit", "ImageIO", "OpenGLES",
+        "QuartzCore", "Security", "SystemConfiguration", "CoreGraphics"
+    ]
+    ss.libraries           = "icucore", "c++", "z"
+    ss.vendored_frameworks = "Frameworks/GoogleMaps.framework"
+    ss.xcconfig            = { 'FRAMEWORK_SEARCH_PATHS' => '"../Frameworks/"' }
+    ss.resources           = "Frameworks/GoogleMaps.framework/Versions/A/Resources/GoogleMaps.bundle"
   end
 
   s.subspec 'GoogleMaps' do |ss|
     ss.dependency     "Gaia/Abstraction"
-    ss.dependency     "GoogleMaps"
+    ss.dependency     "Gaia/GoogleMapsFramework"
 
-    ss.source_files   = "Classes/GoogleMaps/*.swift"
+    ss.source_files        = "Classes/GoogleMaps/*.swift"
+  end
+
+  s.subspec 'Mapbox' do |ss|
+    ss.dependency     "Gaia/Abstraction"
+    ss.dependency     "Mapbox-iOS-SDK"
+
+    ss.source_files        = "Classes/Mapbox/*.swift"
   end
 
   s.subspec 'Abstraction' do |ss|
-    ss.source_files   = "Classes/Abstraction/*.swift"
+    ss.source_files   = "Classes/Abstraction/**/*.swift"
   end
 end

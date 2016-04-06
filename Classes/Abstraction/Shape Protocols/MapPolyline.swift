@@ -2,13 +2,7 @@
  `MapPolyline` specifies the available options for a polyline that exists on the Earth's surface.
  It is drawn as a physical line between the points specified in |path|.
  */
-public protocol MapPolyline: MapShape {
-
-    /// The UIColor used to render the polyline.
-    var strokeColor: UIColor { get set }
-
-    /// The width of the line in screen points.
-    var strokeWidth: CGFloat { get set }
+public protocol MapPolyline: MapOverlay {
 
     /**
      The polyline drawn as a physical line between the points specified in `path`.

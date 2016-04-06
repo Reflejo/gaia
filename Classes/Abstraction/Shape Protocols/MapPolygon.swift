@@ -3,13 +3,7 @@
  series of connected coordinates in an ordered sequence; additionally, polygons form a closed loop
  and define a filled region.
  */
-public protocol MapPolygon: MapShape {
-
-    /// The width of the polygon outline in screen points.
-    var strokeWidth: CGFloat { get set }
-
-    /// The color of the polygon outline.
-    var strokeColor: UIColor? { get set }
+public protocol MapPolygon: MapOverlay {
 
     /// The fill color of the polygon.
     var fillColor: UIColor? { get set }
@@ -21,5 +15,5 @@ public protocol MapPolygon: MapShape {
 
      - returns: the newly created `MapPolygon` composed from the given path.
      */
-    static func fromEncodedPath(encodedPath: String) -> MapPolygon
+    static func fromEncodedPath(encodedPath: String) -> MapPolygon?
 }

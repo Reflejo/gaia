@@ -14,4 +14,5 @@ public protocol MapShape: class {
 
 public extension MapShape {
     var bounds: CoordinateBounds? { return nil }
+    var opacity: Float { return 1.0 }
 }

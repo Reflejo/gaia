@@ -16,7 +16,7 @@ public protocol MapCircle: MapShape {
     var strokeWidth: CGFloat { get set }
 
     /// The color of this circle's outline. The default value is black.
-    var strokeColor: UIColor? { get set }
+    var strokeLineColor: UIColor { get set }
 
     /**
      Convenience constructor for MapCircle conformers for a particular position and radius.

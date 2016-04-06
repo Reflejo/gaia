@@ -1,0 +1,28 @@
+PODS:
+  - Gaia (0.0.1):
+    - Gaia/Core (= 0.0.1)
+  - Gaia/Abstraction (0.0.1)
+  - Gaia/Core (0.0.1):
+    - Gaia/GoogleMaps
+    - Gaia/Mapbox
+  - Gaia/GoogleMaps (0.0.1):
+    - Gaia/Abstraction
+    - Gaia/GoogleMapsFramework
+  - Gaia/GoogleMapsFramework (0.0.1)
+  - Gaia/Mapbox (0.0.1):
+    - Gaia/Abstraction
+    - Mapbox-iOS-SDK
+  - Mapbox-iOS-SDK (3.2.0)
+
+DEPENDENCIES:
+  - Gaia (from `../`)
+
+EXTERNAL SOURCES:
+  Gaia:
+    :path: ../
+
+SPEC CHECKSUMS:
+  Gaia: 76d8145e3656c44401bc4e544f059ff01d297f4d
+  Mapbox-iOS-SDK: 3b9e8d0f77098494cc236384fde2a26eb6683f3d
+
+COCOAPODS: 0.39.0

@@ -11,12 +11,26 @@ public protocol GMSPathRepresentable {
 
 extension GMSPolygon: GMSPathRepresentable, MapPolygon {
 
-    public static func fromEncodedPath(encodedPath: String) -> MapPolygon {
-        return GMSPolygon(path: GMSPath(fromEncodedPath: encodedPath))
+    public var strokeLineColor: UIColor {
+        get { return self.strokeColor ?? .blackColor() }
+        set { self.strokeColor = newValue }
+    }
+
+    public static func fromEncodedPath(encodedPath: String) -> MapPolygon? {
+        guard let path = GMSPath(fromEncodedPath: encodedPath) else {
+            return nil
+        }
+
+        return GMSPolygon(path: path)
     }
 }
 
 extension GMSPolyline: GMSPathRepresentable, MapPolyline {
+
+    public var strokeLineColor: UIColor {
+        get { return self.strokeColor ?? .blackColor() }
+        set { self.strokeColor = newValue }
+    }
 
     public static func fromPath(path: MapPath) -> MapPolyline {
         guard let path = path as? GMSPath else {
@@ -28,24 +42,13 @@ extension GMSPolyline: GMSPathRepresentable, MapPolyline {
     }
 }
 
-extension GMSPath: MapPath {
+extension GMSCircle: MapCircle {
 
-    public var coordinates: [CLLocationCoordinate2D] {
-        return (0 ..< self.count()).map { self.coordinateAtIndex($0) }
-    }
-
-    public static func withPoints(points: [CLLocationCoordinate2D]) -> MapPath {
-        let path = GMSMutablePath()
-        points.forEach { path.addLatitude($0.latitude, longitude: $0.longitude) }
-        return path
-    }
-
-    public static func fromEncodedPath(encodedPath: String) -> MapPath? {
-        return GMSPath(fromEncodedPath: encodedPath)
+    public var strokeLineColor: UIColor {
+        get { return self.strokeColor ?? .blackColor() }
+        set { self.strokeColor = newValue }
     }
 }
-
-extension GMSCircle: MapCircle {}
 
 public extension MapShape where Self: GMSPathRepresentable {
 

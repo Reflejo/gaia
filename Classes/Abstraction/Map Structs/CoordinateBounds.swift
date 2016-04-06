@@ -1,5 +1,8 @@
 import CoreLocation
 
+private typealias Edges = (north: CLLocationDegrees, east: CLLocationDegrees,
+                           south: CLLocationDegrees, west: CLLocationDegrees)
+
 /**
  This struct represents a rectangular bounding box on the Earth's surface. Note that properties are immutable
  and can't be modified after construction.
@@ -25,9 +28,17 @@ public struct CoordinateBounds {
      - parameter coordinates: An array of coordinates from which the bounds will be calculated
      */
     public init(includingCoordinates coordinates: [CLLocationCoordinate2D]) {
-        let edges = Gaia.Utils.boundsEdges(fromCoordinates: coordinates)
-        self.northEast = edges.northEast
-        self.southWest = edges.southWest
+        let edges: Edges = coordinates.reduce((-180, -180, 180, 180)) { edges, coordinate in
+            return (
+                north: max(edges.north, coordinate.latitude),
+                east: max(edges.east, coordinate.longitude),
+                south: min(edges.south, coordinate.latitude),
+                west: min(edges.west, coordinate.longitude)
+            )
+        }
+
+        self.northEast = CLLocationCoordinate2D(latitude: edges.north, longitude: edges.east)
+        self.southWest = CLLocationCoordinate2D(latitude: edges.south, longitude: edges.west)
     }
 
     /**
@@ -59,10 +70,7 @@ public struct CoordinateBounds {
      - parameter coordinate2: The other corners of the box
      */
     public init(coordinate coord1: CLLocationCoordinate2D, coordinate coord2: CLLocationCoordinate2D) {
-        let edges = Gaia.Utils.boundsEdges(fromCoordinates: [coord1, coord2])
-
-        self.northEast = edges.northEast
-        self.southWest = edges.southWest
+        self.init(includingCoordinates: [coord1, coord2])
     }
 
     /**

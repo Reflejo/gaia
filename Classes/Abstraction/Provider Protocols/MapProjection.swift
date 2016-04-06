@@ -16,6 +16,8 @@ public protocol MapProjection {
     func pointForCoordinate(coordinate: CLLocationCoordinate2D) -> CGPoint
 
     /**
+     Returns a CGFLoat representing how many points fit in one metter at the given coordinate (this will use
+     the zoom on the map for when the projection was created).
 
      - parameter meters:     The distance in meters to convert
      - parameter coordinate: The base coordinate for the calculation

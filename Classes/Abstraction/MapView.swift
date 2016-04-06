@@ -4,8 +4,7 @@ private let kMinimumMovementThreshold = 10.0
 private let kPinYCenterDelta: CGFloat = 26.0
 private let kMaximumQueueSize = 3
 
-typealias AnimationQueueElement = (camera: MapCameraUpdate, target: CLLocationCoordinate2D, silent: Bool,
-                                   completion: (Bool -> Void)?)
+typealias AnimationQueueElement = (camera: MapAnimation, silent: Bool, completion: (Bool -> Void)?)
 
 public class MapView: UIView {
 
@@ -25,9 +24,10 @@ public class MapView: UIView {
     }
 
     private lazy var underlyingMap: MapSDKProvider = {
-        assert(Gaia.SDK == nil, "You need to specify a provider before using Gaia.")
+        assert(Gaia.SDK != nil, "You need to specify a provider before using Gaia.")
 
         var map = Gaia.SDK!.provider.init(providerDelegate: self)
+        map.configuration = MapSettings()
         map.rendering = false
         return map
     }()
@@ -68,7 +68,7 @@ public class MapView: UIView {
     public var touchesInScreen: Int { return self.underlyingMap.touchesInScreen }
 
     /// A view showing legally required copyright notices, positioned at the bottom-right of the map view.
-    public var attributionButton: UIView? { return self.underlyingMap.attributionButton }
+    public var attributionView: UIView? { return self.underlyingMap.attributionView }
 
     /// Whether the user's location is displayed on the map.
     public var myLocationEnabled: Bool {
@@ -97,13 +97,23 @@ public class MapView: UIView {
 
     // MARK: - View life cycle
 
+    public override func awakeFromNib() {
+        super.awakeFromNib()
+
+        self.underlyingMap.view.translatesAutoresizingMaskIntoConstraints = false
+        self.insertSubview(self.underlyingMap.view, atIndex: 0)
+
+        let options = NSLayoutFormatOptions(rawValue: 0)
+        let vertical = NSLayoutConstraint.constraintsWithVisualFormat(
+            "V:|[view]|", options: options, metrics: nil, views: ["view": self.underlyingMap.view])
+        let horizontal = NSLayoutConstraint.constraintsWithVisualFormat(
+            "H:|[view]|", options: options, metrics: nil, views: ["view": self.underlyingMap.view])
+        self.addConstraints(vertical + horizontal)
+    }
+
     public override func didMoveToWindow() {
         super.didMoveToWindow()
-
-        if self.window != nil {
-            self.insertSubview(self.underlyingMap.view, atIndex: 0)
-            self.underlyingMap.rendering = true
-        }
+        self.underlyingMap.rendering = self.window != nil
     }
 
     // MARK: - Generic map methods
@@ -183,9 +193,7 @@ public class MapView: UIView {
      - parameter silently: When true, the change on the centerPosition will not notify its observers.
      */
     public func setTarget(target: CLLocationCoordinate2D, silently: Bool = false) {
-        let CameraUpdateType = Gaia.ProviderTypes.CameraUpdateType
-        self.moveCamera(update: CameraUpdateType.withTarget(target), target: target, animated: false,
-                        silently: silently)
+        self.moveCamera(animation: .Target(target, nil), animated: false, silently: silently)
     }
 
     /**
@@ -207,10 +215,7 @@ public class MapView: UIView {
             return
         }
 
-        let CameraUpdateType = Gaia.ProviderTypes.CameraUpdateType
-        let cameraUpdate = zoom.map { CameraUpdateType.withTarget(target, zoom: $0) }
-            ?? CameraUpdateType.withTarget(target)
-        self.moveCamera(update: cameraUpdate, target: target, silently: silently, completion: completion)
+        self.moveCamera(animation: .Target(target, zoom), silently: silently, completion: completion)
     }
 
     /**
@@ -251,9 +256,7 @@ public class MapView: UIView {
         }
 
         bounds = bounds.boundToDistance(min: minVisibleDistance, max: maxVisibleDistance)
-
-        let CameraUpdateType = Gaia.ProviderTypes.CameraUpdateType
-        self.moveCamera(update: CameraUpdateType.fitBounds(bounds), target: bounds.center, silently: silently)
+        self.moveCamera(animation: .Bounds(bounds), silently: silently)
     }
 
     /**
@@ -267,10 +270,8 @@ public class MapView: UIView {
                                             centerPosition: CLLocationCoordinate2D? = nil,
                                             completion: (Bool -> Void)? = nil)
     {
-        let CameraUpdateType = Gaia.ProviderTypes.CameraUpdateType
         let translatedBounds = centerPosition.map(bounds.translateTo) ?? bounds
-        self.moveCamera(update: CameraUpdateType.fitBounds(translatedBounds), target: bounds.center,
-                        silently: silently, completion: completion)
+        self.moveCamera(animation: .Bounds(translatedBounds), silently: silently, completion: completion)
     }
 
     /**
@@ -282,9 +283,8 @@ public class MapView: UIView {
 
     // MARK: - Private helpers
 
-    private func moveCamera(update cameraUpdate: MapCameraUpdate, target: CLLocationCoordinate2D,
-                                   animated: Bool = true, silently: Bool = false,
-                                   completion: (Bool -> Void)? = nil)
+    private func moveCamera(animation animation: MapAnimation, animated: Bool = true, silently: Bool = false,
+                            completion: (Bool -> Void)? = nil)
     {
         self.cameraFollowsUser = false
         self.performWithoutNotifying = silently
@@ -293,15 +293,15 @@ public class MapView: UIView {
                 self.animationsQueue.removeLast()
             }
 
-            let element: AnimationQueueElement = (cameraUpdate, target, silently, completion)
+            let element: AnimationQueueElement = (animation, silently, completion)
             self.animationsQueue.insert(element, atIndex: 0)
             return
         }
 
         self.queuedCompletion?(false)
         self.queuedCompletion = completion
-        self.willMoveMap?(isGesture: false, target: target)
-        self.underlyingMap.moveCameraWithUpdate(cameraUpdate, animated: animated)
+        self.willMoveMap?(isGesture: false, target: animation.target)
+        self.underlyingMap.moveCameraWithAnimation(animation, animated: animated)
     }
 }
 
@@ -324,8 +324,8 @@ extension MapView: MapProviderDelegate {
         self.queuedCompletion = nil
 
         if self.animationsQueue.count > 0 {
-            let (camera, target, silent, completion) = self.animationsQueue.removeLast()
-            return self.moveCamera(update: camera, target: target, silently: silent, completion: completion)
+            let (animation, silent, completion) = self.animationsQueue.removeLast()
+            return self.moveCamera(animation: animation, silently: silent, completion: completion)
         }
 
         // Fire it asynchronously so the closure is executed after listeners have heard about this change

@@ -1,0 +1,12 @@
+platform :ios, "8.0"
+workspace "GaiaExample"
+
+use_frameworks!
+
+# Workaround while this is fixed: https://code.google.com/p/gmaps-api-issues/issues/detail?id=9512
+#pod 'GoogleMaps' , :podspec => "https://raw.githubusercontent.com/Reflejo/GoogleMapsPodspec/master/GoogleMaps.podspec.json"
+pod 'Gaia'       , :path => "../"
+
+#pre_install do |installer|
+#    def installer.verify_no_static_framework_transitive_dependencies; end
+#end

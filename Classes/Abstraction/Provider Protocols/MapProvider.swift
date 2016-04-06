@@ -5,10 +5,6 @@ import CoreLocation
  instances according to the current provider.
  */
 public struct MapProviderTypes {
-    /// Provides an implementation for camera position properties. This is used for example by MapView
-    /// to provide animations.
-    let CameraUpdateType: MapCameraUpdate.Type
-
     /// The type that all map markers conform to. Markers contains at least a position and an icon.
     let MarkerType: MapMarker.Type
 
@@ -24,9 +20,6 @@ public struct MapProviderTypes {
     /// Defines a polygon that appears on the map. A polygon defines a series of connected coordinates in
     /// an ordered sequence.
     let PolygonType: MapPolygon.Type
-
-    /// A type that encapsulates a series of coordinates.
-    let PathType: MapPath.Type
 
     /// Provides all the geometric utilities containing the math to calculate position offsets, distance, etc.
     let UtilsType: MapUtilsProvider.Type
@@ -145,7 +138,7 @@ public protocol MapSDKProvider {
     var centerPosition: CLLocationCoordinate2D { get }
 
     /// A view showing legally required copyright notices, positioned at the bottom-right of the map view.
-    var attributionButton: UIView? { get }
+    var attributionView: UIView? { get }
 
     /// MapProjection object that you can use to convert between screen coordinates and lat/long coordinates.
     var project: MapProjection { get }
@@ -187,7 +180,7 @@ public protocol MapSDKProvider {
      - parameter cameraUpdate: The camera update to apply.
      - parameter animated:     A flag indicating whether the update should be animated or not.
      */
-    func moveCameraWithUpdate(cameraUpdate: MapCameraUpdate, animated: Bool)
+    func moveCameraWithAnimation(animation: MapAnimation, animated: Bool)
 
     /**
      Add shape into the map view.

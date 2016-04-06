@@ -34,9 +34,6 @@ public protocol MapMarker: MapShape {
     /// where (0,0) is the top-left corner of the image, and (1,1) is the bottom-right corner.
     var groundAnchor: CGPoint { get set }
 
-    /// Sets the opacity of the marker, between 0 (completely transparent) and 1
-    var opacity: Float { get set }
-
     /// Sets the rotation of the marker in degrees clockwise about the marker's anchor point. The axis of
     /// rotation is perpendicular to the marker. A rotation of 0 is the default position of the marker.
     var rotation: CLLocationDegrees { get set }
@@ -50,6 +47,9 @@ public protocol MapMarker: MapShape {
 
     /// Whether the marker will appear by using the default animation from the map SDK provider.
     var appearAnimated: Bool { get set }
+
+    /// Sets the opacity of the marker, between 0 (completely transparent) and 1
+    var opacity: Float { get set }
 
     /**
      Craetes a `MapMarker` instance that will be positioned on the given `position`.

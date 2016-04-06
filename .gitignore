@@ -4,6 +4,7 @@
 build/
 DerivedData
 output/
+Pods/
 
 *.pbxuser
 !default.pbxuser

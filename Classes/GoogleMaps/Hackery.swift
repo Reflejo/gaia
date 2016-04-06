@@ -20,7 +20,7 @@ extension GMSMapView {
     }
 
     /// Returns the view associated with the little google logo image/button
-    var attributionButton: UIView? {
+    var attributionView: UIView? {
         let settings = self.valueForKey("_settings") as? NSObject
         let settingsView = settings?.valueForKey("view") as? UIView
 

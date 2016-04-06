@@ -1,8 +1,6 @@
 import GoogleMaps
 
 private let kDefaultMapZoom: Float = 13.0
-private let kMapMaximumZoom: Float = 18.5
-private let kMapMinimumZoom: Float = 0.0
 
 extension MapProviderIdentifier {
     public static let GoogleMaps = MapProviderIdentifier(GoogleMapsView.self)
@@ -60,13 +58,11 @@ final class GoogleMapsView: GMSMapView {
 extension GoogleMapsView: MapSDKProvider {
 
     static var types = MapProviderTypes(
-        CameraUpdateType: GMSCameraUpdate.self,
         MarkerType: GoogleMapsMarker.self,
         MapURLTileLayerType: GMSURLTileLayer.self,
         CircleType: GMSCircle.self,
         PolylineType: GMSPolyline.self,
         PolygonType: GMSPolygon.self,
-        PathType: GMSPath.self,
         UtilsType: GoogleMapsUtils.self,
 
         customTypes: [:]
@@ -101,12 +97,21 @@ extension GoogleMapsView: MapSDKProvider {
         }
     }
 
-    func moveCameraWithUpdate(cameraUpdate: MapCameraUpdate, animated: Bool) {
-        guard let cameraUpdate = cameraUpdate as? GMSCameraUpdate else {
-            return
+    func moveCameraWithAnimation(animation: MapAnimation, animated: Bool) {
+        let cameraUpdate: GMSCameraUpdate
+        switch animation {
+            case .Bounds(let bounds):
+                let bounds = GMSCoordinateBounds(coordinate: bounds.northEast, coordinate: bounds.southWest)
+                cameraUpdate = GMSCameraUpdate.fitBounds(bounds)
+
+            case .Target(let target, nil):
+                cameraUpdate = GMSCameraUpdate.setTarget(target)
+
+            case .Target(let target, let zoom):
+                cameraUpdate =  GMSCameraUpdate.setTarget(target, zoom: zoom ?? 0.0)
         }
 
-        animated ? self.animateWithCameraUpdate(cameraUpdate) : self.moveCamera(cameraUpdate)
+        self.animateWithCameraUpdate(cameraUpdate)
     }
 
     func addShape(shape: MapShape) {

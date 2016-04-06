@@ -33,9 +33,8 @@ public struct Gaia {
     /// is not supported and will result on an undefined behavior.
     public static var SDK: MapProviderIdentifier?
 
-    /// Helper to access the `Types` for the set SDK provider.
-    static var ProviderTypes: MapProviderTypes {
-        assert(Gaia.SDK == nil, "You need to specify a provider before using Gaia.")
+    private static var ProviderTypes: MapProviderTypes {
+        assert(Gaia.SDK != nil, "You need to specify a provider before using Gaia.")
         return Gaia.SDK!.provider.types
     }
 
@@ -99,7 +98,7 @@ public struct Gaia {
                                                strokeWidth: CGFloat = 1) -> MapPolyline
     {
         var polyline = ProviderTypes.PolylineType.fromPath(path)
-        polyline.strokeColor = strokeColor
+        polyline.strokeLineColor = strokeColor
         polyline.strokeWidth = strokeWidth
         return polyline
     }
@@ -112,32 +111,8 @@ public struct Gaia {
 
      - returns: the newly created instance conforming to `MapPolygon`.
      */
-    public static func createPolygon(fromEncodedPath encodedPath: String) -> MapPolygon {
+    public static func createPolygon(fromEncodedPath encodedPath: String) -> MapPolygon? {
         return ProviderTypes.PolygonType.fromEncodedPath(encodedPath)
-    }
-
-    /**
-     Creates a concrete instance conforming to `MapPath`. Note that the instance type will depend on the
-     set SDK Provider.
-
-     - parameter points: The array of points that will be contained in the path.
-
-     - returns: the newly created instance conforming to `MapPath`.
-     */
-    public static func createPath(withPoints points: [CLLocationCoordinate2D]) -> MapPath {
-        return ProviderTypes.PathType.withPoints(points)
-    }
-
-    /**
-     Creates a concrete instance conforming to `MapPath`. Note that the instance type will depend on the
-     set SDK Provider.
-
-     - parameter encodedPath: The path represented using Google's Encoded Polyline Algorithm Format.
-
-     - returns: the newly created instance conforming to `MapPath`.
-     */
-    public static func createPath(fromEncodedPath encodedPath: String) -> MapPath? {
-        return ProviderTypes.PathType.fromEncodedPath(encodedPath)
     }
 
     /**

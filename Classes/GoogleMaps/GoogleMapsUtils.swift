@@ -26,11 +26,4 @@ struct GoogleMapsUtils: MapUtilsProvider {
     {
         return GMSGeometryOffset(from, distance, heading)
     }
-
-    static func boundsEdges(fromCoordinates coordinates: [CLLocationCoordinate2D])
-        -> (northEast: CLLocationCoordinate2D, southWest: CLLocationCoordinate2D)
-    {
-        let bounds = coordinates.reduce(GMSCoordinateBounds()) { $0.includingCoordinate($1) }
-        return (bounds.northEast, bounds.southWest)
-    }
 }
