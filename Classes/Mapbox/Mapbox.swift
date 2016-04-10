@@ -3,7 +3,7 @@ import Mapbox
 private let kDefaultMapZoom = 13.0
 
 extension MapProviderIdentifier {
-    public static let Mapbox = MapProviderIdentifier(MapboxView.self)
+    public static let Mapbox = MapProviderIdentifier(MapboxView.self, name: "Mapbox")
 }
 
 final class MapboxView: MGLMapView {
@@ -13,25 +13,16 @@ final class MapboxView: MGLMapView {
     /// A boolean that indicates if the map reports to be in the middle of an animation.
     var isAnimating = false
 
+    lazy var project: MapProjection = MapboxProjection(map: self)
+
     /// The currently set settings for the map.
     var configuration = MapSettings() {
         willSet {
-            self.showsUserLocation = newValue.myLocationEnabled
             self.rotateEnabled = newValue.rotateGestures
             self.pitchEnabled = newValue.tiltGestures
 
             self.minimumZoomLevel = Double(newValue.zoomLimits.min)
             self.maximumZoomLevel = Double(newValue.zoomLimits.max)
-        }
-    }
-
-    convenience init(providerDelegate: MapProviderDelegate) {
-        self.init(frame: CGRect(x: 0, y: 0, width: 320, height: 480))
-        self.providerDelegate = providerDelegate
-        self.delegate = self
-
-        dispatch_async(dispatch_get_main_queue()) {
-            self.setZoomLevel(kDefaultMapZoom, animated: false)
         }
     }
 }
@@ -40,31 +31,13 @@ final class MapboxView: MGLMapView {
 
 extension MapboxView: MapSDKProvider {
 
-    static var types = MapProviderTypes(
-        MarkerType: MapboxMarker.self,
-        MapURLTileLayerType: MapboxURLTileLayer.self,
-        CircleType: MapboxCircle.self,
-        PolylineType: MapboxPolyline.self,
-        PolygonType: MapboxPolygon.self,
-        UtilsType: MapboxUtils.self,
-
-        customTypes: [:]
-    )
-
     var cameraFollowsUser: Bool {
         get { return self.userTrackingMode != .None }
         set { self.userTrackingMode = .Follow }
     }
 
     var zoom: Float { return Float(self.zoomLevel) }
-    var project: MapProjection { return MapboxProjection(map: self) }
     var attributionView: UIView? { return self.attributionButton }
-
-    /// FIXME: Implement this on Mapbox
-    var rendering: Bool {
-        get { return true }
-        set { }
-    }
 
     var myLocationEnabled: Bool {
         get { return self.showsUserLocation }
@@ -80,16 +53,6 @@ extension MapboxView: MapSDKProvider {
         set { self.selectAnnotation(newValue as! MGLAnnotation, animated: true) }
     }
 
-    var touchesInScreen: Int {
-        return self.gestureRecognizers?
-            .map { $0.numberOfTouches() }
-            .maxElement() ?? 0
-    }
-
-    var duringGesture: Bool {
-        return self.touchesInScreen > 0
-    }
-
     static func provideAPIKey(key: String) {
         MGLAccountManager.setAccessToken(key)
     }
@@ -102,26 +65,41 @@ extension MapboxView: MapSDKProvider {
     func moveCameraWithAnimation(animation: MapAnimation, animated: Bool) {
         switch animation {
             case .Target(let target, nil):
-                print(target)
                 self.setCenterCoordinate(target, animated: animated)
 
             case .Target(let target, let zoom):
-                self.setCenterCoordinate(target, zoomLevel: Double(zoom ?? 0.0), animated: animated)
+                let zoom = zoom.map { Double($0 - 1) } ?? 0.0
+                self.setCenterCoordinate(target, zoomLevel: zoom, animated: animated)
 
             case .Bounds(let bounds):
                 let bounds = MGLCoordinateBounds(sw: bounds.southWest, ne: bounds.northEast)
-                self.setVisibleCoordinateBounds(bounds, animated: animated)
+                self.setVisibleCoordinateBounds(bounds, animated: true)
         }
     }
 
     func addShape(shape: MapShape) {
-        guard let annotation = shape as? MGLAnnotation else {
-            assertionFailure("Tried to add a shape into Mapbox that is not compatible. Check Gaia.SDK.")
+        guard let annotation = shape as? MapboxOverlayConvertible else {
+            assertionFailure("Tried to add a shape into Mapbox that is not compatible.")
             return
         }
 
-        (shape as? MapboxMarker)?.map = self
-        self.addAnnotation(annotation)
+        self.addOverlay(annotation.createAndAssignMapboxOverlay())
+    }
+
+    func addMarker(marker: MapMarker, animated: Bool) {
+        let marker = MapboxMarker(metaMarker: marker)
+        marker.metaMarker.delegate = self
+        self.addAnnotation(marker)
+    }
+
+    // FIXME: Support shape removal animated.
+    func removeAnnotation(annotation: MapAnnotation, animated: Bool) {
+        guard let annotation = annotation.underlyingAnnotation as? MGLAnnotation else {
+            assertionFailure("Tried to remove a shape into Mapbox that is not compatible.")
+            return
+        }
+
+        self.removeAnnotation(annotation)
     }
 
     func clear() {
@@ -131,16 +109,14 @@ extension MapboxView: MapSDKProvider {
     /// FIXME: Do something here to support navigation
     func setNavigating(navigating: Bool) {}
 
-    // FIXME: Support shape removal animated.
-    func removeShape(shape: MapShape, animated: Bool) {
-        assert(!animated, "Mapbox doesn't support animations when removing markers yet.")
+    convenience init(providerDelegate: MapProviderDelegate) {
+        self.init(frame: CGRect(x: 0, y: 0, width: 320, height: 480))
+        self.providerDelegate = providerDelegate
+        self.delegate = self
 
-        guard let annotation = shape as? MGLAnnotation else {
-            assertionFailure("Tried to remove a shape into Mapbox that is not compatible. Check Gaia.SDK.")
-            return
+        dispatch_async(dispatch_get_main_queue()) {
+            self.setZoomLevel(kDefaultMapZoom, animated: false)
         }
-
-        self.removeAnnotation(annotation)
     }
 }
 
@@ -148,12 +124,12 @@ extension MapboxView: MapSDKProvider {
 
 extension MapboxView: MGLMapViewDelegate {
 
-    public func mapViewRegionIsChanging(mapView: MGLMapView) {
+    func mapViewRegionIsChanging(mapView: MGLMapView) {
         self.isAnimating = true
         self.providerDelegate?.mapProvider(self, didChangeCameraPosition: self.centerCoordinate)
     }
 
-    public func mapView(mapView: MGLMapView, regionWillChangeAnimated animated: Bool) {
+    func mapView(mapView: MGLMapView, regionWillChangeAnimated animated: Bool) {
         self.isAnimating = true
         self.providerDelegate?.mapProvider(self, willMoveWithGesture: self.duringGesture)
     }
@@ -186,30 +162,39 @@ extension MapboxView: MGLMapViewDelegate {
     }
 
     func mapView(mapView: MGLMapView, imageForAnnotation annotation: MGLAnnotation) -> MGLAnnotationImage? {
-        guard let image = (annotation as? MapMarker)?.icon else {
+        guard let icons = (annotation as? MapboxMarker)?.metaMarker.icons else {
             return nil
         }
 
-        return MGLAnnotationImage(image: image, reuseIdentifier: "")
-    }
-
-    func mapView(mapView: MGLMapView, annotationCanShowCallout annotation: MGLAnnotation) -> Bool {
-        return (annotation as? MapMarker)?.tooltipView != nil
+        return MGLAnnotationImage(image: icons.normal, reuseIdentifier: "")
     }
 
     func mapView(mapView: MGLMapView, alphaForShapeAnnotation annotation: MGLShape) -> CGFloat {
-        return (annotation as? MapMarker).map { CGFloat($0.opacity) } ?? 1.0
+        guard let marker = annotation as? MapboxMarker else {
+            return 1.0
+        }
+
+        return CGFloat(marker.metaMarker.opacity)
     }
 
     func mapView(mapView: MGLMapView, strokeColorForShapeAnnotation annotation: MGLShape) -> UIColor {
-        return (annotation as? MapOverlay)?.strokeLineColor ?? .blackColor()
+        switch annotation {
+            case let polygon as MapboxPolygon:
+                return polygon.metaPolygon?.strokeColor ?? .blackColor()
+
+            case let polyline as MapboxPolyline:
+                return polyline.metaPolyline?.strokeColor ?? .blackColor()
+
+            default:
+                return .blackColor()
+        }
     }
 
     func mapView(mapView: MGLMapView, fillColorForPolygonAnnotation annotation: MGLPolygon) -> UIColor {
-        return (annotation as? MapPolygon)?.fillColor ?? .blackColor()
+        return (annotation as? MapboxPolygon)?.metaPolygon?.fillColor ?? .blackColor()
     }
 
     func mapView(mapView: MGLMapView, lineWidthForPolylineAnnotation annotation: MGLPolyline) -> CGFloat {
-        return (annotation as? MapOverlay)?.strokeWidth ?? 1.0
+        return (annotation as? MapboxPolyline)?.metaPolyline?.strokeWidth ?? 1.0
     }
 }

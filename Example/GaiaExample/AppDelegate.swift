@@ -9,9 +9,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool
     {
-        Gaia.SDK = .Mapbox
-        Gaia.provideAPIKey("", forProvider: .GoogleMaps)
-        Gaia.provideAPIKey("..", forProvider: .Mapbox)
+        Gaia.registerProvider(.GoogleMaps, APIKey: Constants.GoogleKey)
+        Gaia.registerProvider(.Mapbox, APIKey: Constants.MapboxKey)
+        Gaia.registerProvider(.AppleMaps)
 
         return true
     }

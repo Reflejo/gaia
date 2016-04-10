@@ -14,11 +14,6 @@ extension GMSMapView {
         return duringGesture == true
     }
 
-    /// Number of touches on the screen for the running gesture.
-    var touchesInScreen: Int {
-        return self.gestureRecognizers?.first?.numberOfTouches() ?? 0
-    }
-
     /// Returns the view associated with the little google logo image/button
     var attributionView: UIView? {
         let settings = self.valueForKey("_settings") as? NSObject

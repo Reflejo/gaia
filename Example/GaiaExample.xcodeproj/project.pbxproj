@@ -7,26 +7,26 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		260E7CE41CBB81F200DABE0F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 260E7CE31CBB81F200DABE0F /* Assets.xcassets */; };
+		260E7CF21CBBAF1500DABE0F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 260E7CF11CBBAF1500DABE0F /* Constants.swift */; };
 		265140991CB47A4400CCE636 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265140981CB47A4400CCE636 /* AppDelegate.swift */; };
 		2651409B1CB47A4400CCE636 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2651409A1CB47A4400CCE636 /* ViewController.swift */; };
 		2651409E1CB47A4400CCE636 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2651409C1CB47A4400CCE636 /* Main.storyboard */; };
 		265140A31CB47A4400CCE636 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 265140A11CB47A4400CCE636 /* LaunchScreen.storyboard */; };
-		26AF6ED71CB6455D00452468 /* gaia.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AF6ED61CB6455D00452468 /* gaia.png */; };
-		26AF6ED91CB6460900452468 /* lyft_black@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AF6ED81CB6460900452468 /* lyft_black@2x.png */; };
-		26AF6EE11CB64CC400452468 /* pin_btn@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 26AF6EE01CB64CC400452468 /* pin_btn@2x.png */; };
+		26C68B571CBB0F2300A47B4A /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C68B561CBB0F2300A47B4A /* MapViewController.swift */; };
 		90F0E64DC16F0B2F4410CEB9 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC347B72F84825E61A474ED8 /* Pods.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		260E7CE31CBB81F200DABE0F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		260E7CF11CBBAF1500DABE0F /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		265140951CB47A4400CCE636 /* GaiaExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GaiaExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		265140981CB47A4400CCE636 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2651409A1CB47A4400CCE636 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		2651409D1CB47A4400CCE636 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		265140A21CB47A4400CCE636 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		265140A41CB47A4400CCE636 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		26AF6ED61CB6455D00452468 /* gaia.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gaia.png; sourceTree = "<group>"; };
-		26AF6ED81CB6460900452468 /* lyft_black@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "lyft_black@2x.png"; sourceTree = "<group>"; };
-		26AF6EE01CB64CC400452468 /* pin_btn@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "pin_btn@2x.png"; sourceTree = "<group>"; };
+		26C68B561CBB0F2300A47B4A /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		AC347B72F84825E61A474ED8 /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE1E180AC1FC06EC474754F1 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		C65D0BF46599AA3086C2D0A3 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
@@ -74,13 +74,13 @@
 			isa = PBXGroup;
 			children = (
 				265140981CB47A4400CCE636 /* AppDelegate.swift */,
+				260E7CF11CBBAF1500DABE0F /* Constants.swift */,
 				2651409A1CB47A4400CCE636 /* ViewController.swift */,
+				26C68B561CBB0F2300A47B4A /* MapViewController.swift */,
 				2651409C1CB47A4400CCE636 /* Main.storyboard */,
 				265140A11CB47A4400CCE636 /* LaunchScreen.storyboard */,
-				26AF6ED81CB6460900452468 /* lyft_black@2x.png */,
-				26AF6EE01CB64CC400452468 /* pin_btn@2x.png */,
-				26AF6ED61CB6455D00452468 /* gaia.png */,
 				265140A41CB47A4400CCE636 /* Info.plist */,
+				260E7CE31CBB81F200DABE0F /* Assets.xcassets */,
 			);
 			path = GaiaExample;
 			sourceTree = "<group>";
@@ -155,9 +155,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26AF6ED91CB6460900452468 /* lyft_black@2x.png in Resources */,
-				26AF6EE11CB64CC400452468 /* pin_btn@2x.png in Resources */,
-				26AF6ED71CB6455D00452468 /* gaia.png in Resources */,
+				260E7CE41CBB81F200DABE0F /* Assets.xcassets in Resources */,
 				265140A31CB47A4400CCE636 /* LaunchScreen.storyboard in Resources */,
 				2651409E1CB47A4400CCE636 /* Main.storyboard in Resources */,
 			);
@@ -219,7 +217,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				2651409B1CB47A4400CCE636 /* ViewController.swift in Sources */,
+				26C68B571CBB0F2300A47B4A /* MapViewController.swift in Sources */,
 				265140991CB47A4400CCE636 /* AppDelegate.swift in Sources */,
+				260E7CF21CBBAF1500DABE0F /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

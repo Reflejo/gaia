@@ -13,7 +13,7 @@ public enum MapAnimation {
     /// The center point of the map after the animation is performed
     var target: CLLocationCoordinate2D {
         switch self {
-            case Target(let target, let zoom):
+            case Target(let target, _):
                 return target
 
             case Bounds(let bounds):

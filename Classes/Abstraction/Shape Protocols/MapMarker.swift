@@ -1,60 +1,86 @@
 import CoreLocation
 
+public typealias MarkerIconsType = (normal: UIImage, selected: UIImage?, highlighted: UIImage?)
+
 /**
  A marker is an icon placed at a particular point on the map's surface. A marker's icon is drawn oriented
  against the device's screen rather than the map's surface.
  */
-public protocol MapMarker: MapShape {
+public class MapMarker: MapAnnotation {
 
-    /// Marker icon to render. If left nil, uses a default SDK place marker. Supports animated images, but
-    /// each frame must be the same size or the behavior is undefined.
-    var icon: UIImage? { get set }
+    /// The delegate that will receive all the marker modifications.
+    weak var delegate: MapMarkerDelegate?
 
-    /// Marker position in the map
-    var position: CLLocationCoordinate2D { get set }
+    public weak var underlyingAnnotation: MapProviderAnnotation?
+
+    /// Marker icons to render. If normal is left nil, uses a default SDK place marker.
+    let icons: MarkerIconsType?
 
     /// The unique identifier of the map marker, when not given a default unique key will be choosen.
-    var id: String { get set }
-
-    /// Closure that passes the tapped marker and returns true if the tap event is considered
-    /// handled, otherwise false which will continue with the default marker selection behavior
-    var onTap: (MapMarker -> Bool)? { get set }
-
-    /// Called when marker's tooltip is tapped. Closure passes the tooltip's marker.
-    var onTooltipTap: (MapMarker -> Void)? { get set }
-
-    /// UIView to be displayed as a tooltip for this marker whenever marker is selected
-    var tooltipView: UIView? { get set }
-
-    /// Whether this marker's tooltip is currently visible
-    var isTooltipVisible: Bool { get }
+    let id: String
 
     /// The ground anchor specifies the point in the icon image that is anchored to the marker's position on
     /// the Earth's surface. This point is specified within the continuous space [0.0, 1.0] x [0.0, 1.0],
     /// where (0,0) is the top-left corner of the image, and (1,1) is the bottom-right corner.
-    var groundAnchor: CGPoint { get set }
+    let groundAnchor: CGPoint
+
+    /// Closure that passes the tapped marker and returns true if the tap event is considered
+    /// handled, otherwise false which will continue with the default marker selection behavior
+    public var onTap: (MapMarker -> Bool)?
 
     /// Sets the rotation of the marker in degrees clockwise about the marker's anchor point. The axis of
     /// rotation is perpendicular to the marker. A rotation of 0 is the default position of the marker.
-    var rotation: CLLocationDegrees { get set }
+    public var rotation = CLLocationDegrees(0) {
+        didSet {
+            if oldValue != self.rotation, let underlyingMarker = self.underlyingAnnotation {
+                self.delegate?.markerRotationDidChange(underlyingMarker, rotation: self.rotation)
+            }
+        }
+    }
+
+    /// Marker position in the map
+    public var position: CLLocationCoordinate2D {
+        didSet {
+            if let underlyingMarker = self.underlyingAnnotation {
+                self.delegate?.markerPositionDidChange(underlyingMarker, position: self.position)
+            }
+        }
+    }
 
     /// If this marker should cause tap notifications
-    var tappable: Bool { get set }
-
-    /// The info window anchor specifies the point in the icon image at which to anchor the info window,
-    /// which will be displayed directly above this point.
-    var infoWindowAnchor: CGPoint { get set }
-
-    /// Whether the marker will appear by using the default animation from the map SDK provider.
-    var appearAnimated: Bool { get set }
+    public var tappable = true {
+        didSet {
+            if oldValue != self.tappable, let underlyingMarker = self.underlyingAnnotation {
+                self.delegate?.markerTappableDidChange(underlyingMarker, tappable: self.tappable)
+            }
+        }
+    }
 
     /// Sets the opacity of the marker, between 0 (completely transparent) and 1
-    var opacity: Float { get set }
+    public var opacity: Float = 1.0 {
+        didSet {
+            if oldValue != self.opacity, let underlyingMarker = self.underlyingAnnotation {
+                self.delegate?.markerOpacityDidChange(underlyingMarker, opacity: self.opacity)
+            }
+        }
+    }
+
+    /// Closure called when the marker is about to get selected; this closure determines if the marker should
+    /// toggle selection (selected<->unselected).
+    public var shouldToggleSelection: (MapMarker -> Bool)?
 
     /**
      Craetes a `MapMarker` instance that will be positioned on the given `position`.
 
      - parameter position: The earth coordinate.
      */
-    init(position: CLLocationCoordinate2D)
+    public init(position: CLLocationCoordinate2D, id: String? = nil, icon: UIImage? = nil,
+                selectedIcon: UIImage? = nil, highlightedIcon: UIImage? = nil,
+                groundAnchor: CGPoint = CGPoint(x: 0.5, y: 0.5))
+    {
+        self.position = position
+        self.id = id ?? NSUUID().UUIDString
+        self.icons = icon.map { ($0, selectedIcon, highlightedIcon) }
+        self.groundAnchor = groundAnchor
+    }
 }

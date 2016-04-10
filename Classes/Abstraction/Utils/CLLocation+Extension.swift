@@ -1,8 +1,6 @@
 import CoreLocation
 
 private let kMinDistanceMeters = 5.0 // Distance in meters for equality
-private let kDegreesToRadians = M_PI / 180.0
-private let kEarthRadius = 6378137.0
 
 extension CLLocationCoordinate2D {
 
@@ -19,12 +17,12 @@ extension CLLocationCoordinate2D {
             return CLLocationDistanceMax
         }
 
-        let (λ1, λ2) = (self.longitude * kDegreesToRadians, coordinate.longitude * kDegreesToRadians)
-        let (φ1, φ2) = (self.latitude * kDegreesToRadians, coordinate.latitude * kDegreesToRadians)
+        let (λ1, λ2) = (self.longitude * DegreesToRadians, coordinate.longitude * DegreesToRadians)
+        let (φ1, φ2) = (self.latitude * DegreesToRadians, coordinate.latitude * DegreesToRadians)
         let x = (λ2 - λ1) * cos((φ1 + φ2) / 2.0)
         let y = φ2 - φ1
 
-        return sqrt(x * x + y * y) * kEarthRadius
+        return sqrt(x * x + y * y) * EarthRadius
     }
 }
 

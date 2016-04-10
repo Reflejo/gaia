@@ -1,18 +1,21 @@
+import CoreLocation
+
 /**
- This protocol should be used on any map shape such as markers, polygons, polylines, etc. Each map provider
- should implement the custom logic for the necessary conformance.
+ The `MapShape` protocol defines a specific type of annotation that represents both a point and an area
+ on a map. Overlay objects are essentially data objects that contain the geographic data needed to 
+ represent the map area. 
+
+ For example, overlays can take the form of common shapes such as rectangles and circles. They can also 
+ describe polygons and other complex shapes.
  */
-public protocol MapShape: class {
+public protocol MapShape: MapAnnotation {
 
-    /// Higher `zIndex` value overlays will be drawn on top of lower `zIndex` value tile layers and overlays.
-    /// Equal values result in undefined draw ordering.
-    var zIndex: Int32 { get set }
+    /// The width of the polygon outline in screen points.
+    var strokeWidth: CGFloat { get }
 
-    /// The bounds that encompass the receiver shape.
-    var bounds: CoordinateBounds? { get }
-}
+    /// The color of the polygon outline.
+    var strokeColor: UIColor { get }
 
-public extension MapShape {
-    var bounds: CoordinateBounds? { return nil }
-    var opacity: Float { return 1.0 }
+    /// This bound defines the wrapped rectangle that surrounds the shape
+    var bounds: CoordinateBounds { get }
 }

@@ -6,8 +6,6 @@ private typealias Edges = (north: CLLocationDegrees, east: CLLocationDegrees,
 /**
  This struct represents a rectangular bounding box on the Earth's surface. Note that properties are immutable
  and can't be modified after construction.
-
- WARNING: We are using some Google Maps functions here for the math but this abstraction is used on all SDKs.
  */
 public struct CoordinateBounds {
 
@@ -19,11 +17,12 @@ public struct CoordinateBounds {
 
     /// The center position of the bounds.
     public var center: CLLocationCoordinate2D {
-        return Gaia.Utils.interpolate(from: self.northEast, to: self.southWest, fraction: 0.5)
+        return MapUtils.interpolate(from: self.northEast, to: self.southWest, fraction: 0.5)
     }
 
     /**
-     Creates a CoordinateBounds containing every point included in the passed-in array.
+     Creates a CoordinateBounds containing every point included in the passed-in array. Note that this method
+     doesn't work well if you are crosing the north pole or crossing the 180th meridian.
 
      - parameter coordinates: An array of coordinates from which the bounds will be calculated
      */
@@ -86,7 +85,7 @@ public struct CoordinateBounds {
     public func derive(center: CLLocationCoordinate2D) -> CoordinateBounds {
         let northEastIsFarther = center.distanceTo(self.northEast) > center.distanceTo(self.southWest)
         let farCoordinate = northEastIsFarther ? self.northEast : self.southWest
-        let derivedCoordinate = Gaia.Utils.interpolate(from: farCoordinate, to: center, fraction: 2.0)
+        let derivedCoordinate = MapUtils.interpolate(from: farCoordinate, to: center, fraction: 2.0)
 
         return CoordinateBounds(coordinate: farCoordinate, coordinate: derivedCoordinate)
     }
@@ -102,9 +101,9 @@ public struct CoordinateBounds {
     public func translateTo(center: CLLocationCoordinate2D) -> CoordinateBounds {
         let boundsCenter = self.center
         let distance = boundsCenter.distanceTo(center)
-        let angle = Gaia.Utils.heading(from: boundsCenter, to: center)
-        let northEast = Gaia.Utils.offset(from: self.northEast, distance: distance, heading: angle)
-        let southWest = Gaia.Utils.offset(from: self.southWest, distance: distance, heading: angle)
+        let angle = MapUtils.heading(from: boundsCenter, to: center)
+        let northEast = MapUtils.offset(from: self.northEast, distance: distance, heading: angle)
+        let southWest = MapUtils.offset(from: self.southWest, distance: distance, heading: angle)
 
         return CoordinateBounds(coordinate: northEast, coordinate: southWest)
     }
@@ -124,8 +123,8 @@ public struct CoordinateBounds {
         let southEast = CLLocationCoordinate2D(latitude: southWest.latitude, longitude: northEast.longitude)
 
         let distance = northWest.distanceTo(southEast)
-        let offsetSouthEast = Gaia.Utils.offset(from: southEast, distance: distance * offsetFactor,
-                                                heading: CLLocationDirection(135))
+        let offsetSouthEast = MapUtils.offset(from: southEast, distance: distance * offsetFactor,
+                                              heading: CLLocationDirection(135))
 
         return CoordinateBounds(coordinate: northWest, coordinate: offsetSouthEast)
     }
@@ -148,14 +147,15 @@ public struct CoordinateBounds {
 
         let boundedDistance = Swift.min(Swift.max(visibleDistance, min), max)
         let delta = (1.0 + boundedDistance / visibleDistance) / 2.0
-        let newNorthEast = Gaia.Utils.interpolate(from: self.southWest, to: self.northEast, fraction: delta)
-        let newSouthWest = Gaia.Utils.interpolate(from: self.northEast, to: self.southWest, fraction: delta)
+        let newNorthEast = MapUtils.interpolate(from: self.southWest, to: self.northEast, fraction: delta)
+        let newSouthWest = MapUtils.interpolate(from: self.northEast, to: self.southWest, fraction: delta)
 
         return CoordinateBounds(coordinate: newNorthEast, coordinate: newSouthWest)
     }
 
     /**
      Returns a CoordinateBounds representing the current bounds extended to include the entire other bounds.
+     Note that this method doesn't work if you are crosing the north pole nor crossing the 180th meridian.
 
      - parameter bounds: The bounds used to extend the receiver.
 

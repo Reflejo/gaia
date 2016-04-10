@@ -1,34 +1,6 @@
 import CoreLocation
 
 /**
- Contains all the Types that the map provider needs to specialize. We use this types to construct concrete
- instances according to the current provider.
- */
-public struct MapProviderTypes {
-    /// The type that all map markers conform to. Markers contains at least a position and an icon.
-    let MarkerType: MapMarker.Type
-
-    /// Type in charge of fetch tiles based on a constructed URLs. This is used for example on Heatmaps.
-    let MapURLTileLayerType: MapURLTileLayer.Type
-
-    /// A type that creates circles on the Earth's surface (spherical cap).
-    let CircleType: MapCircle.Type
-
-    /// This type draws physical lines between a set of points.
-    let PolylineType: MapPolyline.Type
-
-    /// Defines a polygon that appears on the map. A polygon defines a series of connected coordinates in
-    /// an ordered sequence.
-    let PolygonType: MapPolygon.Type
-
-    /// Provides all the geometric utilities containing the math to calculate position offsets, distance, etc.
-    let UtilsType: MapUtilsProvider.Type
-
-    /// This dictionary will contain all the registered custom types. See `Gaia.registerType`.
-    var customTypes: [ObjectIdentifier: Any.Type]
-}
-
-/**
  This delegate serves as an abstraction to unify all events that any map SDK can inform back to the
  MapProvider. Map Provider's should send these events.
  */
@@ -96,11 +68,7 @@ public protocol MapProviderDelegate: class {
 /**
  All Map SDKs implementations should conform to this protocol, which is used to specialize all Map operations.
  */
-public protocol MapSDKProvider {
-
-    /// The specialized types that the map provider defines for all our abstractions such as `MapPolyline`,
-    /// `MapPolygon`, `MapMarker`, etc.
-    static var types: MapProviderTypes { get set }
+public protocol MapSDKProvider: class {
 
     /// Tells this map to power down / starts its renderer.
     var rendering: Bool { get set }
@@ -183,9 +151,16 @@ public protocol MapSDKProvider {
     func moveCameraWithAnimation(animation: MapAnimation, animated: Bool)
 
     /**
-     Add shape into the map view.
+     Add a marker into the map view.
 
-     - parameter shape: The shape to add to the receiver. The map view retains the MapShape object.
+     - parameter marker: The marker to be added to the receiver. The map view retains the given object.
+     */
+    func addMarker(marker: MapMarker, animated: Bool)
+
+    /**
+     Adds a shape into the map view.
+
+     - parameter shape: The shape to add to the receiver. The map view retains the given object.
      */
     func addShape(shape: MapShape)
 
@@ -193,10 +168,10 @@ public protocol MapSDKProvider {
      Removes an annotation from the map view, deselecting it if it is selected. Removing an annotation object
      dissociates it from the map view entirely, preventing it from being displayed on the map.
 
-     - parameter shape:    The shape to remove.
-     - parameter animated: Whether the shape should fade out before being removed.
+     - parameter annotation: The annotation to remove.
+     - parameter animated:   Whether the shape should fade out before being removed.
      */
-    func removeShape(shape: MapShape, animated: Bool)
+    func removeAnnotation(annotation: MapAnnotation, animated: Bool)
 
     /**
      Creates a new instance of the map view by setting the provider delegate.
@@ -209,6 +184,28 @@ public protocol MapSDKProvider {
     init(providerDelegate: MapProviderDelegate)
 }
 
+// MARK: - Default implementations
+
 extension MapSDKProvider where Self: UIView {
+
     var view: UIView { return self }
+
+    var touchesInScreen: Int {
+        return self.gestureRecognizers?
+            .map { $0.numberOfTouches() }
+            .maxElement() ?? 0
+    }
+
+    var duringGesture: Bool {
+        return self.touchesInScreen > 0
+    }
+}
+
+extension MapSDKProvider {
+
+    /// Most providers don't allow stoping rendering
+    var rendering: Bool {
+        get { return true }
+        set {}
+    }
 }

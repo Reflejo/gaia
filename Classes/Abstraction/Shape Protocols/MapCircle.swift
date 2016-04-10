@@ -3,20 +3,26 @@ import CoreLocation
 /**
  A circle on the Earth's surface (spherical cap).
  */
-public protocol MapCircle: MapShape {
+public class MapCircle: MapShape {
 
     /// Position on Earth of circle center.
-    var position: CLLocationCoordinate2D { get set }
+    public let position: CLLocationCoordinate2D
 
     /// Radius of the circle in meters; must be positive.
-    var radius: CLLocationDistance { get set }
+    public let radius: CLLocationDistance
 
-    /// The width of the circle's outline in screen points. Defaults to 1.
-    /// Setting strokeWidth to 0 results in no stroke.
-    var strokeWidth: CGFloat { get set }
+    /// The color of this circle's filling. The default value is blue.
+    public let fillColor: UIColor
 
-    /// The color of this circle's outline. The default value is black.
-    var strokeLineColor: UIColor { get set }
+    public let zIndex: Int32
+    public let strokeWidth: CGFloat
+    public let strokeColor: UIColor
+    public weak var underlyingAnnotation: MapProviderAnnotation?
+    public var bounds: CoordinateBounds {
+        let northWest = MapUtils.offset(from: self.position, distance: self.radius, heading: 315)
+        let northEast = MapUtils.offset(from: self.position, distance: self.radius, heading: 135)
+        return CoordinateBounds(coordinate: northWest, coordinate: northEast)
+    }
 
     /**
      Convenience constructor for MapCircle conformers for a particular position and radius.
@@ -24,5 +30,14 @@ public protocol MapCircle: MapShape {
      - parameter position: The position on earth of circle center.
      - parameter radius:   The radius of the circle in meters.
      */
-    init(position: CLLocationCoordinate2D, radius: CLLocationDistance)
+    init(position: CLLocationCoordinate2D, radius: CLLocationDistance, zIndex: Int32 = 0,
+         strokeWidth: CGFloat = 1.0, strokeColor: UIColor = .blackColor(), fillColor: UIColor = .blueColor())
+    {
+        self.position = position
+        self.radius = radius
+        self.strokeWidth = strokeWidth
+        self.strokeColor = strokeColor
+        self.fillColor = fillColor
+        self.zIndex = zIndex
+    }
 }

@@ -23,24 +23,26 @@ public class MapView: UIView {
         }
     }
 
-    private lazy var underlyingMap: MapSDKProvider = {
-        assert(Gaia.SDK != nil, "You need to specify a provider before using Gaia.")
+    private lazy var underlyingMap: MapSDKProvider! = {
+        guard let name = self.providerName, let providerID = MapProviderIdentifier.withName(name) else {
+            assertionFailure("Map provider is not specified or invalid (\(self.providerName)).")
+            return nil
+        }
 
-        var map = Gaia.SDK!.provider.init(providerDelegate: self)
+        var map = providerID.provider.init(providerDelegate: self)
         map.configuration = MapSettings()
         map.rendering = false
         return map
     }()
+
+    /// The name of the provider that will be used to construct the map.
+    @IBInspectable public var providerName: String?
 
     /// The currently set settings for the map.
     public var settings: MapSettings {
         get { return self.underlyingMap.configuration }
         set { self.underlyingMap.configuration = newValue }
     }
-
-    /// This property holds the marker that is currently highlighted (the map center is inbetween the
-    /// position of the marker and the radius of the asset).
-    public private(set) var highlightedMarker: MapHighlightableMarker?
 
     /// Zoom level. Zoom uses an exponentional scale, where zoom 0 represents the entire world as a 256 x 256
     /// square. Each successive zoom level increases magnification by a factor of 2.
@@ -95,11 +97,13 @@ public class MapView: UIView {
     /// Returns the screen points per meter for the current map projection, based on centerPosition
     public var projection: MapProjection { return self.underlyingMap.project }
 
-    // MARK: - View life cycle
+    convenience init(provider: MapProviderIdentifier) {
+        self.init(frame: .zero)
+        self.providerName = provider.name
+        self.addUnderlyingMap()
+    }
 
-    public override func awakeFromNib() {
-        super.awakeFromNib()
-
+    private func addUnderlyingMap() {
         self.underlyingMap.view.translatesAutoresizingMaskIntoConstraints = false
         self.insertSubview(self.underlyingMap.view, atIndex: 0)
 
@@ -111,6 +115,13 @@ public class MapView: UIView {
         self.addConstraints(vertical + horizontal)
     }
 
+    // MARK: - View life cycle
+
+    public override func awakeFromNib() {
+        super.awakeFromNib()
+        self.addUnderlyingMap()
+    }
+
     public override func didMoveToWindow() {
         super.didMoveToWindow()
         self.underlyingMap.rendering = self.window != nil
@@ -119,32 +130,7 @@ public class MapView: UIView {
     // MARK: - Generic map methods
 
     /**
-     Sets or removes given icon from highlighted state.
-
-     - parameter marker:      The marker to set (or resign) active.
-     - parameter highlighted: A boolean indicating whether the mark will be set as highlighted or not.
-
-     - returns: a boolean indicating if the operation was completed successfuly.
-     */
-    public func setMarker(marker: MapHighlightableMarker, highlighted: Bool) -> Bool {
-        if !highlighted {
-            self.highlightedMarker = self.highlightedMarker === marker ? nil : self.highlightedMarker
-            return self.highlightedMarker === marker
-        }
-
-        if let markerPosition = self.highlightedMarker?.position where
-            self.centerPosition.distanceTo(markerPosition) <= self.centerPosition.distanceTo(marker.position)
-        {
-            return marker === self.highlightedMarker
-        }
-
-        self.highlightedMarker?.highlighted = false
-        self.highlightedMarker = marker
-        return true
-    }
-
-    /**
-     Add shape into the map view.
+     Adds a shape into the map view.
 
      - parameter shape: The shape to add to the receiver. The map view retains the MapShape object.
      */
@@ -153,13 +139,22 @@ public class MapView: UIView {
     }
 
     /**
+     Adds a marker into the map view.
+
+     - parameter marker: The marker to add to the receiver. The map view retains the MapMarker object.
+     */
+    public func addMarker(marker: MapMarker, animated: Bool = true) {
+        self.underlyingMap.addMarker(marker, animated: animated)
+    }
+
+    /**
      Removes an annotation from the map view, deselecting it if it is selected. Removing an annotation object
      dissociates it from the map view entirely, preventing it from being displayed on the map.
 
      - parameter shape: The shape to remove.
      */
-    public func removeShape(shape: MapShape, animated: Bool = false) {
-        self.underlyingMap.removeShape(shape, animated: animated)
+    public func removeAnnotation(annotation: MapAnnotation, animated: Bool = false) {
+        self.underlyingMap.removeAnnotation(annotation, animated: animated)
     }
 
     // MARK: - Methods to implement by subclasses
@@ -327,9 +322,6 @@ extension MapView: MapProviderDelegate {
             let (animation, silent, completion) = self.animationsQueue.removeLast()
             return self.moveCamera(animation: animation, silently: silent, completion: completion)
         }
-
-        // Fire it asynchronously so the closure is executed after listeners have heard about this change
-        dispatch_async(dispatch_get_main_queue()) { self.highlightedMarker?.select() }
     }
 
     public func mapProvider(provider: MapSDKProvider, willMoveWithGesture gesture: Bool) {
@@ -346,11 +338,10 @@ extension MapView: MapProviderDelegate {
     }
 
     public func mapProvider(provider: MapSDKProvider, didTapInfoWindowOfMarker marker: MapMarker) {
-        marker.onTooltipTap?(marker)
     }
 
     public func mapProvider(provider: MapSDKProvider, markerInfoWindow marker: MapMarker) -> UIView? {
-        return marker.tooltipView
+        return nil
     }
 
     public func mapProvider(provider: MapSDKProvider, didTapMarker marker: MapMarker) -> Bool {
