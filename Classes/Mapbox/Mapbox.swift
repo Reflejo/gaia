@@ -3,6 +3,7 @@ import Mapbox
 private let kDefaultMapZoom = 13.0
 
 extension MapProviderIdentifier {
+    /// Mapbox SDK provider
     public static let Mapbox = MapProviderIdentifier(MapboxView.self, name: "Mapbox")
 }
 
@@ -13,6 +14,7 @@ final class MapboxView: MGLMapView {
     /// A boolean that indicates if the map reports to be in the middle of an animation.
     var isAnimating = false
 
+    /// MapProjection object that you can use to convert between screen coordinates and lat/long coordinates.
     lazy var project: MapProjection = MapboxProjection(map: self)
 
     /// The currently set settings for the map.

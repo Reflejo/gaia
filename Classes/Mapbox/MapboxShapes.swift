@@ -12,11 +12,11 @@ final class MapboxPolygon: MGLPolygon {
     var metaPolygon: MapPolygon?
 }
 
-//final class MapboxCircle: MGLCircle {
-//
-//    /// The meta polygon associated to the shape containing properties such as radius, strokeWidth, color, etc
-//    var metaCircle: MapCircle?
-//}
+final class MapboxCircle: MGLPolygon {
+
+    /// The meta polygon associated to the shape containing properties such as radius, strokeWidth, color, etc
+    var metaCircle: MapCircle?
+}
 
 extension MGLPolygon: MapProviderAnnotation {}
 extension MGLPolyline: MapProviderAnnotation {}

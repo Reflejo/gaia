@@ -15,7 +15,7 @@ extension MKMapView {
 
      - parameter center:   The target center.
      - parameter zoom:     The resulting zoom level.
-     
+
      - returns: the biggest rect that fits the given zoom with `center`.
      */
     func mapRectFor(center center: CLLocationCoordinate2D, zoom: Float? = nil) -> MKMapRect {
@@ -28,7 +28,7 @@ extension MKMapView {
 
      - parameter center:   The target center.
      - parameter zoom:     The region span to calculate the resulting map rect.
-     
+
      - returns: the biggest rect that fits the given span with `center`.
      */
     func mapRectFor(center center: CLLocationCoordinate2D, span: MKCoordinateSpan) -> MKMapRect {

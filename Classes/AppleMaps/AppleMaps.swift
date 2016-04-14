@@ -3,6 +3,7 @@ import MapKit
 private let kDefaultMapZoom: Float = 13.0
 
 extension MapProviderIdentifier {
+    /// Apple Maps provider
     public static let AppleMaps = MapProviderIdentifier(AppleMapsView.self, name: "AppleMaps")
 }
 

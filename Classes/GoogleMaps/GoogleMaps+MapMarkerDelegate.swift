@@ -1,6 +1,7 @@
 import GoogleMaps
 
 extension GoogleMapsView: MapMarkerDelegate {
+
     func markerOpacityDidChange(marker: MapProviderAnnotation, opacity: Float) {
         (marker as? GMSMarker)?.opacity = opacity
     }

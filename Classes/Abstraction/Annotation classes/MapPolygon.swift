@@ -21,13 +21,13 @@ public class MapPolygon: MapShape {
     }
 
     /**
-     Returns whether the given point lies inside the receiver. Inside is defined as not containing the 
-     South Pole. The South Pole is always outside. The polygon is formed of great circle segments if 
+     Returns whether the given point lies inside the receiver. Inside is defined as not containing the
+     South Pole. The South Pole is always outside. The polygon is formed of great circle segments if
      geodesic is true, and of rhumb (loxodromic) segments otherwise.
 
      - parameter position: The point that may be contained within the specified polygon.
      - parameter geodesic: A boolean indicating if the polygon is formed of great circle segments.
-     
+
      - returns: a boolean indicating if the position is inside the polygon.
      */
     func containsPosition(position: CLLocationCoordinate2D, geodesic: Bool = false) -> Bool {

@@ -1,7 +1,7 @@
 import CoreLocation
 
 /**
- This protocol serves as delegation for when any mutable property on a marker changes. Map providers will 
+ This protocol serves as delegation for when any mutable property on a marker changes. Map providers will
  have to react in order to reflect these properties (animated when posible).
  */
 protocol MapMarkerDelegate: class {

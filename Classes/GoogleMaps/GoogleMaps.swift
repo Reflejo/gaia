@@ -3,6 +3,7 @@ import GoogleMaps
 private let kDefaultMapZoom: Float = 13.0
 
 extension MapProviderIdentifier {
+    /// Google Maps provider
     public static let GoogleMaps = MapProviderIdentifier(GoogleMapsView.self, name: "GoogleMaps")
 }
 
