@@ -1,7 +1,5 @@
 import GoogleMaps
 
-private let kDefaultMapZoom: Float = 13.0
-
 extension MapProviderIdentifier {
     /// Google Maps provider
     public static let GoogleMaps = MapProviderIdentifier(GoogleMapsView.self, name: "GoogleMaps")
@@ -139,7 +137,6 @@ extension GoogleMapsView: MapSDKProvider {
         self.delegate = self
         self.configuration = MapSettings()
 
-        self.moveCamera(GMSCameraUpdate.zoomTo(kDefaultMapZoom))
         self.addObserver(self, forKeyPath: "myLocation", options: .New, context: nil)
     }
 }

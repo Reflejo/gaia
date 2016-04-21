@@ -2,34 +2,34 @@ import MapKit
 
 extension AppleMapsView: MapMarkerDelegate {
 
-    func markerOpacityDidChange(marker: MapProviderAnnotation, opacity: Float) {
-        guard let annotation = marker as? MKAnnotation else {
+    func animate(marker: MapProviderAnnotation, duration: NSTimeInterval, options: UIViewAnimationOptions,
+                 animations: () -> Void, completion: (Bool -> Void)?)
+    {
+        print(marker as? MKAnnotation, self.viewForAnnotation(marker as! MKAnnotation))
+        guard let annotation = marker as? MKAnnotation, view = self.viewForAnnotation(annotation) else {
+            animations()
+            let time = dispatch_time(DISPATCH_TIME_NOW, Int64(duration * Double(NSEC_PER_SEC)))
+            dispatch_after(time, dispatch_get_main_queue()) {
+                completion?(false)
+            }
+
             return
         }
 
-        let duration = CATransaction.animationDuration()
-        let completion = CATransaction.completionBlock()
-        let annotationView = self.viewForAnnotation(annotation)
-        UIView.animateWithDuration(
-            duration, delay: 0.0, options: .CurveLinear,
-            animations: { annotationView?.alpha = CGFloat(opacity) },
-            completion: { _ in
-                CATransaction.setCompletionBlock(nil)
-                completion?()
-            })
+        UIView.animateWithDuration(duration, delay: 0.0, options: options,
+                                   animations: animations, completion: completion)
+    }
+
+    func markerOpacityDidChange(marker: MapProviderAnnotation, opacity: Float) {
+        guard let annotation = marker as? MKAnnotation, view = self.viewForAnnotation(annotation) else {
+            return
+        }
+
+        view.alpha = CGFloat(opacity)
     }
 
     func markerPositionDidChange(marker: MapProviderAnnotation, position: CLLocationCoordinate2D) {
-        let duration = CATransaction.animationDuration()
-        let completion = CATransaction.completionBlock()
-
-        UIView.animateWithDuration(
-            duration, delay: 0.0, options: .CurveLinear,
-            animations: { (marker as? MKPointAnnotation)?.coordinate = position },
-            completion: { _ in
-                CATransaction.setCompletionBlock(nil)
-                completion?()
-            })
+        (marker as? MKPointAnnotation)?.coordinate = position
     }
 
     func markerRotationDidChange(marker: MapProviderAnnotation, rotation: CLLocationDegrees) {
@@ -37,19 +37,8 @@ extension AppleMapsView: MapMarkerDelegate {
             return
         }
 
-        let completion = CATransaction.completionBlock()
-        let duration = CATransaction.animationDuration()
-
         let headingInRadians = CGFloat(rotation * DegreesToRadians)
-        let transformation = CGAffineTransformMakeRotation(headingInRadians)
-        UIView.animateWithDuration(
-            duration, delay: 0.0, options: .CurveLinear,
-            animations: { view.layer.setAffineTransform(transformation) },
-            completion: { _ in
-                CATransaction.setCompletionBlock(nil)
-                completion?()
-            })
-
+        view.transform = CGAffineTransformMakeRotation(headingInRadians)
     }
 
     func markerTappableDidChange(marker: MapProviderAnnotation, tappable: Bool) {

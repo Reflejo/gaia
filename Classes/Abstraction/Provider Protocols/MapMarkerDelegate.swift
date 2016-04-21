@@ -7,6 +7,21 @@ import CoreLocation
 protocol MapMarkerDelegate: class {
 
     /**
+     Animate changes to one or more properties using the specified duration, delay, options, and completion
+     handler.
+
+     - parameter marker:     The underlying marker that was mutated.
+     - parameter duration:   The total duration of the animations, measured in seconds.
+     - parameter options:    A mask of options indicating how you want to perform the animations.
+     - parameter animations: A closure containing the changes to commit to the marker. This is where you
+                             programmatically change any animatable properties of the marker. Always use the
+                             marker given as the closure's first argument.
+     - parameter completion: A closure to be executed when the animation sequence ends.
+     */
+    func animate(marker: MapProviderAnnotation, duration: NSTimeInterval, options: UIViewAnimationOptions,
+                 animations: () -> Void, completion: (Bool -> Void)?)
+
+    /**
      This method is called when the rotation property on the marker was changed.
 
      - parameter marker:   The underlying marker that was mutated.

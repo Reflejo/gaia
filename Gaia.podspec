@@ -12,6 +12,7 @@ Pod::Spec.new do |s|
   s.subspec 'Core' do |ss|
     ss.dependency     "Gaia/GoogleMaps"
     ss.dependency     "Gaia/Mapbox"
+    ss.dependency     "Gaia/AppleMaps"
   end
 
   # Workaround while this is fixed: https://code.google.com/p/gmaps-api-issues/issues/detail?id=9512
@@ -36,9 +37,16 @@ Pod::Spec.new do |s|
 
   s.subspec 'Mapbox' do |ss|
     ss.dependency     "Gaia/Abstraction"
+    ss.dependency     "Alamofire"
     ss.dependency     "Mapbox-iOS-SDK"
 
     ss.source_files        = "Classes/Mapbox/*.swift"
+  end
+
+  s.subspec 'AppleMaps' do |ss|
+    ss.dependency     "Gaia/Abstraction"
+
+    ss.source_files        = "Classes/AppleMaps/*.swift"
   end
 
   s.subspec 'Abstraction' do |ss|

@@ -2,6 +2,18 @@ import Mapbox
 
 extension MapboxView: MapMarkerDelegate {
 
+
+    func animate(marker: MapProviderAnnotation, duration: NSTimeInterval, options: UIViewAnimationOptions,
+                 animations: () -> Void, completion: (Bool -> Void)?)
+    {
+        animations()
+
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(duration * Double(NSEC_PER_SEC)))
+        dispatch_after(time, dispatch_get_main_queue()) {
+            completion?(false)
+        }
+    }
+
     func markerOpacityDidChange(marker: MapProviderAnnotation, opacity: Float) {
         guard let annotation = marker as? MGLAnnotation else {
             return

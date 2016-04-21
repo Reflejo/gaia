@@ -182,16 +182,6 @@ public class MapView: UIView {
     }
 
     /**
-     Changes the camera according to |target|. The camera change is instantaneous (with no animation).
-
-     - parameter target:   Location on the earth which the camera points
-     - parameter silently: When true, the change on the centerPosition will not notify its observers.
-     */
-    public func setTarget(target: CLLocationCoordinate2D, silently: Bool = false) {
-        self.moveCamera(animation: .Target(target, nil), animated: false, silently: silently)
-    }
-
-    /**
      Animates camera position for a particular target and zoom level. This will
      set the bearing and viewingAngle properties of this camera to zero defaults (i.e., directly
      facing the Earth's surface, with the top of the screen pointing north).
@@ -199,10 +189,11 @@ public class MapView: UIView {
      - parameter target:     Location on the earth which the camera points
      - parameter zoom:       The zoom level near the center of the screen. By default we won't change the zoom
      - parameter silently:   When true, the change on the centerPosition will not notify its observers.
+     - parameter animated:   A boolean indicating whether the camera will move animated or immediatly.
      - parameter completion: A closure that will be called when the map animation is done
      */
-    public func animateToTarget(target: CLLocationCoordinate2D, zoom: Float? = nil, silently: Bool = false,
-                                completion: (Bool -> Void)? = nil)
+    public func setTarget(target: CLLocationCoordinate2D, zoom: Float? = nil, silently: Bool = false,
+                          animated: Bool = true, completion: (Bool -> Void)? = nil)
     {
         let zoomHasChanged = abs((zoom ?? self.zoom) - self.zoom) > FLT_EPSILON
         if target == self.centerPosition && !zoomHasChanged {
@@ -210,7 +201,8 @@ public class MapView: UIView {
             return
         }
 
-        self.moveCamera(animation: .Target(target, zoom), silently: silently, completion: completion)
+        self.moveCamera(animation: .Target(target, zoom), animated: animated, silently: silently,
+                        completion: completion)
     }
 
     /**

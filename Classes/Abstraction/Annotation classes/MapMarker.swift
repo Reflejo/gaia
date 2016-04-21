@@ -70,6 +70,28 @@ public class MapMarker: MapAnnotation {
     public var shouldToggleSelection: (MapMarker -> Bool)?
 
     /**
+     Animate changes to one or more properties using the specified duration, delay, options, and completion
+     handler.
+
+     - parameter duration:   The total duration of the animations, measured in seconds.
+     - parameter options:    A mask of options indicating how you want to perform the animations.
+     - parameter animations: A closure containing the changes to commit to the marker. This is where you 
+                             programmatically change any animatable properties of the marker. Always use the
+                             marker given as the closure's first argument.
+     - parameter completion: A closure to be executed when the animation sequence ends.
+     */
+    public func animate(duration duration: NSTimeInterval, options: UIViewAnimationOptions = [.CurveLinear],
+                                 animations: (MapMarker) -> Void, completion: (Bool -> Void)? = nil)
+    {
+        guard let underlyingMarker = self.underlyingAnnotation else {
+            return
+        }
+
+        self.delegate?.animate(underlyingMarker, duration: duration, options: options,
+                               animations: { [unowned self] in animations(self) }, completion: completion)
+    }
+
+    /**
      Craetes a `MapMarker` instance that will be positioned on the given `position`.
 
      - parameter position: The earth coordinate.

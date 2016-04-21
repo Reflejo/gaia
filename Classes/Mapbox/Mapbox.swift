@@ -1,7 +1,5 @@
 import Mapbox
 
-private let kDefaultMapZoom = 13.0
-
 extension MapProviderIdentifier {
     /// Mapbox SDK provider
     public static let Mapbox = MapProviderIdentifier(MapboxView.self, name: "Mapbox")
@@ -112,13 +110,9 @@ extension MapboxView: MapSDKProvider {
     func setNavigating(navigating: Bool) {}
 
     convenience init(providerDelegate: MapProviderDelegate) {
-        self.init(frame: CGRect(x: 0, y: 0, width: 320, height: 480))
+        self.init(frame: .zero)
         self.providerDelegate = providerDelegate
         self.delegate = self
-
-        dispatch_async(dispatch_get_main_queue()) {
-            self.setZoomLevel(kDefaultMapZoom, animated: false)
-        }
     }
 }
 

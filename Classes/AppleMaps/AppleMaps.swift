@@ -1,7 +1,5 @@
 import MapKit
 
-private let kDefaultMapZoom: Float = 13.0
-
 extension MapProviderIdentifier {
     /// Apple Maps provider
     public static let AppleMaps = MapProviderIdentifier(AppleMapsView.self, name: "AppleMaps")
@@ -139,8 +137,6 @@ extension AppleMapsView: MapSDKProvider {
 
         self.providerDelegate = providerDelegate
         self.delegate = self
-
-        self.moveCameraWithAnimation(.Target(self.centerCoordinate, kDefaultMapZoom), animated: false)
     }
 }
 
