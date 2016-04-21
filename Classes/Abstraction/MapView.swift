@@ -23,20 +23,13 @@ public class MapView: UIView {
         }
     }
 
-    private lazy var underlyingMap: MapSDKProvider! = {
-        guard let name = self.providerName, let providerID = MapProviderIdentifier.withName(name) else {
-            assertionFailure("Map provider is not specified or invalid (\(self.providerName)).")
-            return nil
-        }
-
-        var map = providerID.provider.init(providerDelegate: self)
-        map.configuration = MapSettings()
-        map.rendering = false
-        return map
-    }()
+    private var underlyingMap: MapSDKProvider!
 
     /// The name of the provider that will be used to construct the map.
-    @IBInspectable public var providerName: String?
+    @IBInspectable var providerName: String?
+
+    /// The provider identifier that is being used by the receiver.
+    public var provider: MapProviderIdentifier!
 
     /// The currently set settings for the map.
     public var settings: MapSettings {
@@ -99,11 +92,16 @@ public class MapView: UIView {
 
     convenience init(provider: MapProviderIdentifier) {
         self.init(frame: .zero)
-        self.providerName = provider.name
-        self.addUnderlyingMap()
+        self.addUnderlyingMap(provider: provider)
     }
 
-    private func addUnderlyingMap() {
+    private func addUnderlyingMap(provider providerID: MapProviderIdentifier) {
+        self.provider = providerID
+
+        self.underlyingMap = providerID.provider.init(providerDelegate: self)
+        self.underlyingMap.configuration = MapSettings()
+        self.underlyingMap.rendering = false
+        self.underlyingMap.cameraFollowsUser = self.cameraFollowsUser
         self.underlyingMap.view.translatesAutoresizingMaskIntoConstraints = false
         self.insertSubview(self.underlyingMap.view, atIndex: 0)
 
@@ -119,7 +117,10 @@ public class MapView: UIView {
 
     public override func awakeFromNib() {
         super.awakeFromNib()
-        self.addUnderlyingMap()
+
+        if let name = self.providerName, provider = MapProviderIdentifier.withName(name) {
+            self.addUnderlyingMap(provider: provider)
+        }
     }
 
     public override func didMoveToWindow() {

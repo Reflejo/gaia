@@ -2,7 +2,8 @@ import GoogleMaps
 
 extension MapProviderIdentifier {
     /// Google Maps provider
-    public static let GoogleMaps = MapProviderIdentifier(GoogleMapsView.self, name: "GoogleMaps")
+    public static let GoogleMaps = MapProviderIdentifier(GoogleMapsView.self, api: GoogleMapsAPI.self,
+                                                         name: "GoogleMaps")
 }
 
 final class GoogleMapsView: GMSMapView {

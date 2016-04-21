@@ -2,7 +2,7 @@ import Mapbox
 
 extension MapProviderIdentifier {
     /// Mapbox SDK provider
-    public static let Mapbox = MapProviderIdentifier(MapboxView.self, name: "Mapbox")
+    public static let Mapbox = MapProviderIdentifier(MapboxView.self, api: MapboxAPI.self, name: "Mapbox")
 }
 
 final class MapboxView: MGLMapView {
@@ -33,7 +33,7 @@ extension MapboxView: MapSDKProvider {
 
     var cameraFollowsUser: Bool {
         get { return self.userTrackingMode != .None }
-        set { self.userTrackingMode = .Follow }
+        set { self.userTrackingMode = self.cameraFollowsUser ? .Follow : .None }
     }
 
     var zoom: Float { return Float(self.zoomLevel) }

@@ -2,7 +2,8 @@ import MapKit
 
 extension MapProviderIdentifier {
     /// Apple Maps provider
-    public static let AppleMaps = MapProviderIdentifier(AppleMapsView.self, name: "AppleMaps")
+    public static let AppleMaps = MapProviderIdentifier(AppleMapsView.self, api: AppleMapsAPI.self,
+                                                        name: "AppleMaps")
 }
 
 final class AppleMapsView: MKMapView {
@@ -45,7 +46,7 @@ extension AppleMapsView: MapSDKProvider {
 
     var cameraFollowsUser: Bool {
         get { return self.userTrackingMode != .None }
-        set { self.userTrackingMode = .Follow }
+        set { self.userTrackingMode = self.cameraFollowsUser ? .Follow : .None }
     }
 
     func setNavigating(navigating: Bool) {

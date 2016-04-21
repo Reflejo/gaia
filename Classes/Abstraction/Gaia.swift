@@ -11,12 +11,15 @@ import CoreLocation
 
  so we don't need to make providers public and consumers can use this identifier instead (`.GoogleMaps`).
  */
-public struct MapProviderIdentifier {
+public struct MapProviderIdentifier: Equatable {
 
     private static var providersByName: [String: MapProviderIdentifier] = [:]
 
     /// The internal SDK provider.
     let provider: MapSDKProvider.Type
+
+    /// The internal SDK provider.
+    let APIProvider: MapAPIProvider.Type
 
     /// The internal SDK name.
     let name: String
@@ -36,10 +39,13 @@ public struct MapProviderIdentifier {
      Creates a `MapProviderIdentifier` by wrapping the `SDKProvider.Type` internally.
 
      - parameter provider: The Type of the concrete MapSDKProvider conformer.
+     - parameter api:      The Type of the concrete MapAPIProvider conformer.
+     - parameter name:     A human friendly description of the provider.
      */
-    init(_ provider: MapSDKProvider.Type, name: String) {
+    init(_ provider: MapSDKProvider.Type, api: MapAPIProvider.Type, name: String) {
         self.provider = provider
         self.name = name
+        self.APIProvider = api
     }
 }
 
@@ -56,5 +62,13 @@ public struct Gaia {
 
         let provider = providerID.provider
         provider.provideAPIKey(APIKey)
+        providerID.APIProvider.APIKey = APIKey
     }
+}
+
+/**
+ Compares two map provider identifier by checking the underlying provider.
+ */
+public func == (lhs: MapProviderIdentifier, rhs: MapProviderIdentifier) -> Bool {
+    return lhs.provider == rhs.provider
 }
