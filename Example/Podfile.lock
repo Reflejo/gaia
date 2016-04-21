@@ -1,8 +1,12 @@
 PODS:
+  - Alamofire (3.3.1)
   - Gaia (0.0.1):
     - Gaia/Core (= 0.0.1)
   - Gaia/Abstraction (0.0.1)
+  - Gaia/AppleMaps (0.0.1):
+    - Gaia/Abstraction
   - Gaia/Core (0.0.1):
+    - Gaia/AppleMaps
     - Gaia/GoogleMaps
     - Gaia/Mapbox
   - Gaia/GoogleMaps (0.0.1):
@@ -10,6 +14,7 @@ PODS:
     - Gaia/GoogleMapsFramework
   - Gaia/GoogleMapsFramework (0.0.1)
   - Gaia/Mapbox (0.0.1):
+    - Alamofire
     - Gaia/Abstraction
     - Mapbox-iOS-SDK
   - Mapbox-iOS-SDK (3.2.0)
@@ -22,7 +27,8 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
-  Gaia: 76d8145e3656c44401bc4e544f059ff01d297f4d
+  Alamofire: 369bc67b6f5ac33ded3648d7bd21c5bfb91c2ecc
+  Gaia: 93c1618ef66b91e32ec2149d7e85f74dc89ab83c
   Mapbox-iOS-SDK: 3b9e8d0f77098494cc236384fde2a26eb6683f3d
 
 COCOAPODS: 0.39.0

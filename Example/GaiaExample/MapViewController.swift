@@ -2,6 +2,9 @@ import CoreLocation
 import Gaia
 import UIKit
 
+private let kTotalCarDuration = 150.0
+private let kInitialMapPosition = CLLocationCoordinate2D(latitude: 37.7, longitude: -122.4)
+
 /**
  Executes the given clousure after a delay of "delay" seconds.
 
@@ -15,31 +18,37 @@ public func executeAfter(delay: Double, closure: () -> Void) {
 
 class MapViewController: UIViewController {
 
-    @IBOutlet private var mapView: MapView!
+    /// This is the UIView containing the abstract methods and the underlying map view.
+    @IBOutlet var mapView: MapView!
+    @IBOutlet var HUD: LoadingHUD!
+
+    @IBOutlet private var reverseLabel: UILabel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.reverseLabel.alpha = 0.0
+    }
 
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+
+        self.mapView.setTarget(kInitialMapPosition, zoom: 15, animated: false)
         self.mapView.setPadding(UIEdgeInsets(top: 30.0, left: 0.0, bottom: 30.0, right: 0.0), animated: false)
     }
 
-    func zoom() {
-        self.mapView.animateToTarget(Constants.TestStartPoint, zoom: 15)
+    func zoom(to to: CLLocationCoordinate2D, zoom: Float) {
+        self.mapView.setTarget(to, zoom: zoom)
     }
 
-    func drawPolylineAndMoveCar() {
+    func drawPolylineAndMoveCar(from from: CLLocationCoordinate2D, to: CLLocationCoordinate2D,
+                                    route: MapPolyline)
+    {
         self.mapView.clear()
-
-        let markerStart = MapMarker(position: Constants.TestStartPoint)
-        let markerEnd = MapMarker(position: Constants.TestEndPoint)
-        self.mapView.addMarker(markerStart)
-        self.mapView.addMarker(markerEnd)
-
-        let route = MapPolyline(encodedPath: Constants.TestEncodedRoute, strokeColor: .magentaColor(),
-                                strokeWidth: 5.0)!
+        self.mapView.addMarker(MapMarker(position: from))
+        self.mapView.addMarker(MapMarker(position: to))
         self.mapView.addShape(route)
 
-        self.mapView.zoomToRegion(thatFitsCoordinates: [Constants.TestStartPoint, Constants.TestEndPoint])
+        self.mapView.zoomToRegion(thatFitsCoordinates: [from, to])
         self.makeCarDrive(throughCoordinates: route.coordinates)
     }
 
@@ -55,26 +64,39 @@ class MapViewController: UIViewController {
         }
     }
 
+    func setAddress(address: String?) {
+        self.reverseLabel.text = address
+        UIView.animateWithDuration(0.3) {
+            self.reverseLabel.alpha = address == nil ? 0.0 : 1.0
+        }
+    }
+
     private func makeCarDrive(throughCoordinates coordinates: [CLLocationCoordinate2D]) {
         let carMarker = MapMarker(position: coordinates[0], icon: UIImage(named: "lyft_black"))
         carMarker.rotation = MapUtils.heading(from: coordinates[0], to: coordinates[1])
         self.mapView.addMarker(carMarker)
 
-        let stepDuration = 0.8
-        for (i, coordinate) in coordinates.enumerate() {
-            executeAfter(Double(i) * stepDuration) {
-                CATransaction.begin()
-                CATransaction.setAnimationDuration(stepDuration)
-                carMarker.position = coordinate
-                if i > 0 {
-                    carMarker.rotation = MapUtils.heading(from: coordinates[i - 1], to: coordinates[i])
-                }
-                CATransaction.commit()
+        let distances = (1 ..< coordinates.count).map { coordinates[$0].distanceTo(coordinates[$0 - 1]) }
+        let totalDistance = distances.reduce(0.0) { $0 + $1 }
+        let steps = distances.enumerate()
+            .filter { $0.element > 0.01 }
+            .map { ($0.element / totalDistance, coordinates[$0.index], coordinates[$0.index + 1]) }
+
+        func playStep(step: Int) {
+            if step >= steps.count {
+                return self.mapView.removeAnnotation(carMarker, animated: true)
             }
+
+            let (deltaTime, start, end) = steps[step]
+            carMarker.animate(
+                duration: kTotalCarDuration * deltaTime,
+                animations: { marker in
+                    marker.position = end
+                    marker.rotation = MapUtils.heading(from: start, to: end)
+                },
+                completion: { _ in playStep(step + 1) })
         }
 
-        executeAfter(Double(coordinates.count) * stepDuration) {
-            self.mapView.removeAnnotation(carMarker, animated: true)
-        }
+        playStep(0)
     }
 }
