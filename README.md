@@ -7,7 +7,7 @@ supported map provider just by setting one property.
 This is an example of Gaia running with three instances of MapView with
 providers: `Mapbox`, `AppleMaps`, `GoogleMaps.`
 
-![gaia](https://cloud.githubusercontent.com/assets/232113/14424112/3a454092-ff94-11e5-9f61-72722fec2982.gif)
+![gaia](https://cloud.githubusercontent.com/assets/232113/14695631/c3f875e8-0728-11e6-944f-5e7683bf2388.gif)
 
 ## Usage
 
