@@ -225,7 +225,10 @@ private extension MapPlace {
         }
 
         if isAddress {
-            self.thoroughfare = [feature["address"] as? String, feature["text"] as? String]
+            // Mapbox API sometimes returns address as a string and some other times as a number.
+            let addressNumber = (feature["address"] as? Int).map { String($0) }
+            let addressNumberAsString = feature["address"] as? String
+            self.thoroughfare = [addressNumber ?? addressNumberAsString, feature["text"] as? String]
                 .flatMap { $0 }
                 .joinWithSeparator(" ")
         } else {

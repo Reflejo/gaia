@@ -5,17 +5,6 @@ extension AppleMapsView: MapMarkerDelegate {
     func animate(marker: MapProviderAnnotation, duration: NSTimeInterval, options: UIViewAnimationOptions,
                  animations: () -> Void, completion: (Bool -> Void)?)
     {
-        print(marker as? MKAnnotation, self.viewForAnnotation(marker as! MKAnnotation))
-        guard let annotation = marker as? MKAnnotation, view = self.viewForAnnotation(annotation) else {
-            animations()
-            let time = dispatch_time(DISPATCH_TIME_NOW, Int64(duration * Double(NSEC_PER_SEC)))
-            dispatch_after(time, dispatch_get_main_queue()) {
-                completion?(false)
-            }
-
-            return
-        }
-
         UIView.animateWithDuration(duration, delay: 0.0, options: options,
                                    animations: animations, completion: completion)
     }

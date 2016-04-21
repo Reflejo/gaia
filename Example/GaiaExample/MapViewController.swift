@@ -2,7 +2,7 @@ import CoreLocation
 import Gaia
 import UIKit
 
-private let kTotalCarDuration = 150.0
+private let kTotalCarDuration = 12.0
 private let kInitialMapPosition = CLLocationCoordinate2D(latitude: 37.7, longitude: -122.4)
 
 /**

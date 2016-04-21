@@ -14,7 +14,6 @@ class ViewController: UIViewController {
 
     @IBAction private func drawPolylineAndMoveCar() {
         for case let viewController as MapViewController in self.childViewControllers {
-            if viewController.mapView.provider != .AppleMaps { continue }
             let API = MapAPI(provider: viewController.mapView.provider)
 
             viewController.HUD.show("Getting directions")
