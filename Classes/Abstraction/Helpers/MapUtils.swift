@@ -50,16 +50,22 @@ public struct MapUtils {
         let (φ1, φ2) = (from.latitude * DegreesToRadians, to.latitude * DegreesToRadians)
         let (λ1, λ2) = (from.longitude * DegreesToRadians, to.longitude * DegreesToRadians)
 
-        let δ = from.distanceTo(to)
-        let a = sin((1 - fraction) * δ) / sin(δ)
-        let b = sin(fraction * δ) / sin(δ)
+        // Computes Spherical interpolation coefficients.
+        let δ = from.distanceTo(to) / EarthRadius
+        let sinδ = sin(δ)
+        if sinδ < 1e-6 {
+            return from
+        }
+
+        let a = sin((1 - fraction) * δ) / sinδ
+        let b = sin(fraction * δ) / sinδ
         let x = a * cos(φ1) * cos(λ1) + b * cos(φ2) * cos(λ2)
         let y = a * cos(φ1) * sin(λ1) + b * cos(φ2) * sin(λ2)
-        let z = a * sin(φ1) +  b * sin(φ2)
+        let z = a * sin(φ1) + b * sin(φ2)
 
         return CLLocationCoordinate2D(
-            latitude: atan2(z, sqrt(x * x + y * y)),
-            longitude: atan2(y, x)
+            latitude: atan2(z, sqrt(x * x + y * y)) * RadiansToDegrees,
+            longitude: atan2(y, x) * RadiansToDegrees
         )
     }
 
@@ -104,21 +110,25 @@ public struct MapUtils {
         // see http://williams.best.vwh.net/avform.htm#LL
         let δ = distance / EarthRadius
         let θ = heading * DegreesToRadians
+        let sinδ = sin(δ)
+        let cosδ = cos(δ)
 
-        let φ1 = from.latitude * DegreesToRadians
-        let λ1 = from.longitude * DegreesToRadians
+        let φ = from.latitude * DegreesToRadians
+        let λ = from.longitude * DegreesToRadians
 
-        let φ2 = asin(sin(φ1) * cos(δ) + cos(φ1) * sin(δ) * cos(θ))
-        let x = cos(δ) - sin(φ1) * sin(φ2)
-        let y = sin(θ) * sin(δ) * cos(φ1)
-        let λ2 = λ1 + atan2(y, x)
+        let sinφ = sin(φ)
+        let cosφ = cos(φ)
+
+        let φ2 = asin(sinφ * cosδ + cosφ * sinδ * cos(θ))
+        let x = cosδ - sinφ * sinφ
+        let y = sin(θ) * sinδ * cosφ
+        let λ2 = λ + atan2(y, x)
 
         return CLLocationCoordinate2D(
             latitude: φ2 * RadiansToDegrees,
-            longitude: ((λ2 * RadiansToDegrees) + 540) % 369 - 180
+            longitude: λ2 * RadiansToDegrees
         )
     }
-
 
     /**
      Computes whether the vertical segment (latitude3, longitude3) to South Pole intersects the segment

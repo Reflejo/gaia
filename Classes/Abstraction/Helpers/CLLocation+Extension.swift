@@ -1,8 +1,10 @@
 import CoreLocation
 
 private let kMinDistanceMeters = 5.0 // Distance in meters for equality
+private let kScale = 100000.0  // 5 digits after decimal point
 
-extension CLLocationCoordinate2D {
+extension CLLocationCoordinate2D: Hashable {}
+public extension CLLocationCoordinate2D {
 
     /**
      Returns the distance (in meters) from the receiver's coordinate to the specified coordinate.
@@ -24,24 +26,28 @@ extension CLLocationCoordinate2D {
 
         return sqrt(x * x + y * y) * EarthRadius
     }
+
+    public var hashValue: Int {
+        let latitude = Int(round(self.latitude * kScale))
+        let longitude = Int(round(self.longitude * kScale))
+        return latitude ^ ((longitude << 16) | (longitude >> 16))
+    }
 }
 
 /**
- Equatable definition for CLLocationCoordinate2D, this checks that the coordinates are "very close".
+ Equatable definition for CLLocationCoordinate2D, this checks that the coordinates are
+ the same with the scale of 5 decimal.
 
  - parameter lhs: A CLLocationCoordinate2D to compare
  - parameter rhs: A CLLocationCoordinate2D to compare
  */
-func == (lhs: CLLocationCoordinate2D, rhs: CLLocationCoordinate2D) -> Bool {
-    return lhs.distanceTo(rhs) <= kMinDistanceMeters
-}
+public func == (lhs: CLLocationCoordinate2D, rhs: CLLocationCoordinate2D) -> Bool {
+    let lhsInvalid = !CLLocationCoordinate2DIsValid(lhs) || isnan(lhs.latitude) || isnan(lhs.longitude)
+    let rhsInvalid = !CLLocationCoordinate2DIsValid(rhs) || isnan(rhs.latitude) || isnan(rhs.longitude)
+    if lhsInvalid || rhsInvalid {
+        return lhsInvalid == rhsInvalid
+    }
 
-/**
- Equatable definition for CLLocationCoordinate2D, this checks that the coordinates are "far away".
-
- - parameter lhs: A CLLocationCoordinate2D to compare
- - parameter rhs: A CLLocationCoordinate2D to compare
- */
-func != (lhs: CLLocationCoordinate2D, rhs: CLLocationCoordinate2D) -> Bool {
-    return lhs.distanceTo(rhs) > kMinDistanceMeters
+    return Int(round(lhs.latitude * kScale)) == Int(round(rhs.latitude * kScale)) &&
+        Int(round(lhs.longitude * kScale)) == Int(round(rhs.longitude * kScale))
 }

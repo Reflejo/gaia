@@ -42,11 +42,12 @@ public struct MapPath {
     /**
      Decodes a string encoded using Google Polyline Encoding Format into an array of coordinates
 
-     - parameter encoded: The string encoded using Google Polyline Encoding Format
+     - parameter encoded:   The string encoded using Google Polyline Encoding Format
+     - parameter precision: The precision used for encoding (default: `1e5`)
 
      - returns: an array of locations or nil if the encoded path is invalid
      */
-    static func decodePoints(encoded: String) -> [CLLocationCoordinate2D]? {
+    static func decodePoints(encoded: String, precision: Double = 1e5) -> [CLLocationCoordinate2D]? {
         let bytes = Array(encoded.utf8)
         var position = 0
 
@@ -58,8 +59,10 @@ public struct MapPath {
         let length = bytes.count
         while position < bytes.count {
             do {
-                latitude += try MapPath.decodeCoordinate(bytes: bytes, length: length, position: &position)
-                longitude += try MapPath.decodeCoordinate(bytes: bytes, length: length, position: &position)
+                latitude += try MapPath.decode(bytes: bytes, length: length, position: &position,
+                                               precision: precision)
+                longitude += try MapPath.decode(bytes: bytes, length: length, position: &position,
+                                                precision: precision)
             } catch {
                 return nil
             }
@@ -72,7 +75,7 @@ public struct MapPath {
 
     // MARK: - Private helpers
 
-    private static func decodeCoordinate(bytes bytes: [UInt8], length: Int, inout position: Int)
+    private static func decode(bytes bytes: [UInt8], length: Int, inout position: Int, precision: Double)
         throws -> Double
     {
         guard position < length else {
@@ -94,6 +97,6 @@ public struct MapPath {
         }
 
         coordinate = (coordinate & 1) == 1 ? ~(coordinate >> 1) : coordinate >> 1
-        return Double(coordinate) / 1e5
+        return Double(coordinate) / precision
     }
 }
