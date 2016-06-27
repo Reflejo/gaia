@@ -1,8 +1,8 @@
 Pod::Spec.new do |s|
   s.name                = "Gaia"
   s.version             = "0.0.1"
-  s.summary             = ""
-  s.homepage            = ""
+  s.summary             = "Gaia provides a unified interface to interact with map SDKs in iOS."
+  s.homepage            = "https://github.com/lyft/gaia"
   s.license             = "MIT"
   s.author              = { "Martin Conte Mac Donell" => "Reflejo@gmail.com" }
   s.platform            = :ios, "8.0"
